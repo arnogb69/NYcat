@@ -134,18 +134,17 @@
           { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true },
           { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822 },
           { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true },
-          { name: "MoMA", lat: 40.7614, lng: -73.9776, price: true, freeNote: "Free" },
           { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true },
           { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true },
           { name: "Flatiron by night", lat: 40.7411, lng: -73.9897 },
           { name: "Bryant Park", lat: 40.7536, lng: -73.9832 },
-          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772 },
-          { name: "MET", lat: 40.7794, lng: -73.9632, price: true, freeNote: "Free" }
+          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772 }
         ]
       },
       "Food": {
         color: "#FF9500",
         items: [
+          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832 },
           { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960 },
           { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906 },
           { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897 },
@@ -216,13 +215,13 @@
       zoomControl: false
     });
 
-    // Tuiles OpenStreetMap (mises en cache via Service Worker)
+    // Tuiles OpenStreetMap
     const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Overlay du réseau Métro MTA (CartoDB Light / OpenRailway Map)
+    // Overlay Métro MTA
     const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
       maxZoom: 19,
       opacity: 0.75
@@ -266,13 +265,11 @@
       itemsDiv.className = 'category-items';
 
       cat.items.forEach((item, idx) => {
-        // Build badges
         let badgeHTML = '';
         if (item.price) badgeHTML += '<span class="badge-price">$</span>';
         if (item.free) badgeHTML += '<span class="badge-free">Gratuit</span>';
         if (item.freeNote) badgeHTML += '<span class="badge-free">' + item.freeNote + '</span>';
 
-        // Marker Leaflet
         const icon = createCustomIcon(cat.color, item.icon);
         const marker = L.marker([item.lat, item.lng], { icon: icon });
         marker.bindPopup(`<b>${item.name}</b><br><small>${catName}</small>`);
@@ -280,7 +277,6 @@
 
         markerStore[catName].push({ marker, id: `${catName}-${idx}` });
 
-        // Item row UI
         const row = document.createElement('div');
         row.className = 'item-row';
         row.innerHTML = `
@@ -292,7 +288,6 @@
         `;
         itemsDiv.appendChild(row);
 
-        // Item checkbox listener
         setTimeout(() => {
           document.getElementById(`item-toggle-${catName}-${idx}`).addEventListener('change', (e) => {
             if (e.target.checked) map.addLayer(marker);
@@ -305,7 +300,6 @@
       catGroup.appendChild(itemsDiv);
       container.appendChild(catGroup);
 
-      // Category global toggle listener
       setTimeout(() => {
         document.getElementById(`cat-toggle-${catName}`).addEventListener('change', (e) => {
           const checked = e.target.checked;
@@ -341,7 +335,7 @@
     document.getElementById('panel-toggle').onclick = () => sidebar.classList.add('active');
     document.getElementById('panel-close').onclick = () => sidebar.classList.remove('active');
 
-    // --- 6. ENREGISTREMENT SERVICE WORKER (HORS LIGNE) ---
+    // --- 6. ENREGISTREMENT SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Fail', err));
     }
