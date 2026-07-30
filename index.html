@@ -58,9 +58,11 @@
     .category-group.open .category-items { display: block; }
 
     .item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #d1d1d6; }
-    
+    .item-info { display: flex; flex-direction: column; }
+    .item-hours { font-size: 11px; color: #8e8e93; margin-top: 2px; }
+
     /* Toggle Switch */
-    .switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+    .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3a3a3c; transition: .2s; border-radius: 22px; }
     .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .2s; border-radius: 50%; }
@@ -105,7 +107,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // --- 1. DONNÉES DES LIEUX ---
+    // --- Fonction de nettoyage d'identifiant ---
+    function sanitizeId(str) {
+      return str.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
+    // --- 1. DONNÉES DES LIEUX (AVEC HORAIRES POUR LES MAGASINS ET EDGE) ---
     const placesData = {
       "Hôtel": {
         color: "#FF3B30",
@@ -114,37 +121,38 @@
           { name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }
         ]
       },
-      "🛍️ Boutiques & Expériences": {
+      "Boutiques & Expériences": {
         color: "#5856D6",
         icon: "🛍️",
         items: [
-          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄" },
-          { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" },
-          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡" },
-          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" },
-          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸" }
+          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄", hours: "10:00 - 20:00" },
+          { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬", hours: "10:00 - 22:00" },
+          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", hours: "09:00 - 21:00" },
+          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱", hours: "10:00 - 20:00" },
+          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸", hours: "10:00 - 20:00" }
         ]
       },
-      "🎟️ Spectacles & Musées": {
+      "Spectacles & Musées": {
         color: "#5856D6",
         icon: "🎟️",
         items: [
           { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866, icon: "🎭" },
           { name: "Spectacle Gospel", lat: 40.8078, lng: -73.9456, price: true, icon: "🎵" },
-          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕" },
-          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢" }
+          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", hours: "10:00 - 17:30" },
+          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢", hours: "10:00 - 17:00" }
         ]
       },
-      "🗽 Monuments & Vues": {
+      "Monuments & Vues": {
         color: "#5856D6",
         icon: "🗽",
         items: [
+          { name: "Edge NYC (Hudson Yards)", lat: 40.7538, lng: -74.0022, price: true, icon: "📐", hours: "09:00 - 22:00" },
           { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true, icon: "🗽" },
-          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true, icon: "🏙️" },
-          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true, icon: "🕊️" }
+          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true, icon: "🏙️", hours: "10:00 - 22:00" },
+          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true, icon: "🕊️", hours: "09:00 - 20:00" }
         ]
       },
-      "🌳 Parcs, Promenades & Quartiers": {
+      "Parcs, Promenades & Quartiers": {
         color: "#5856D6",
         icon: "🌳",
         items: [
@@ -156,7 +164,7 @@
           { name: "Bryant Park", lat: 40.7536, lng: -73.9832, icon: "☕" },
           { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true, icon: "🚢" },
           { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772, icon: "🚉" },
-          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822, icon: "📚" },
+          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822, icon: "📚", hours: "10:00 - 18:00" },
           { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true, icon: "🌉" },
           { name: "Coney Island", lat: 40.5755, lng: -73.9827, icon: "🎡" }
         ]
@@ -165,73 +173,73 @@
         color: "#CC2B1D",
         icon: "🍕",
         items: [
-          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" },
-          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕" },
-          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945, icon: "🍕" }
+          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕", hours: "10:00 - 04:00" },
+          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕", hours: "11:30 - 23:30" },
+          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945, icon: "🍕", hours: "10:00 - 02:00" }
         ]
       },
       "Bagels": {
         color: "#AF52DE",
         icon: "🥯",
         items: [
-          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" },
-          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯" },
-          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687, icon: "🥯" }
+          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯", hours: "07:00 - 15:00" },
+          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯", hours: "06:00 - 16:00" },
+          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687, icon: "🥯", hours: "06:00 - 17:00" }
         ]
       },
       "Brunch": {
         color: "#FF2D55",
         icon: "🍳",
         items: [
-          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳" },
-          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳" }
+          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳", hours: "08:30 - 22:00" },
+          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳", hours: "17:00 - 00:00" }
         ]
       },
       "Food / Restos": {
         color: "#FF9500",
         icon: "🍔",
         items: [
-          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔" },
-          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960, icon: "🍝" },
-          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906, icon: "🍜" },
-          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897, icon: "🍽️" },
-          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868, icon: "🥢" },
-          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902, icon: "🍜" },
-          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012, icon: "🍣" },
-          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792, icon: "🥙" },
-          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" },
-          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835, icon: "🌯" }
+          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔", hours: "07:00 - 00:00" },
+          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960, icon: "🍝", hours: "11:30 - 23:00" },
+          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906, icon: "🍜", hours: "11:30 - 22:30" },
+          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897, icon: "🍽️", hours: "12:00 - 22:00" },
+          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868, icon: "🥢", hours: "11:30 - 01:00" },
+          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902, icon: "🍜", hours: "11:00 - 22:30" },
+          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012, icon: "🍣", hours: "11:30 - 22:00" },
+          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792, icon: "🥙", hours: "10:00 - 04:00" },
+          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪", hours: "08:00 - 23:00" },
+          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835, icon: "🌯", hours: "11:00 - 22:00" }
         ]
       },
       "Bakeries": {
         color: "#34C759",
         icon: "🥐",
         items: [
-          { name: "Junior's Cheesecake (Times Square)", lat: 40.7583, lng: -73.9863, icon: "🍰" },
-          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833, icon: "🥐" },
-          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015, icon: "🧁" },
-          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912, icon: "🥮" },
-          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882, icon: "🍞" }
+          { name: "Junior's Cheesecake (Times Square)", lat: 40.7583, lng: -73.9863, icon: "🍰", hours: "07:00 - 00:00" },
+          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833, icon: "🥐", hours: "08:00 - 18:00" },
+          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015, icon: "🧁", hours: "07:30 - 19:30" },
+          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912, icon: "🥮", hours: "06:30 - 20:00" },
+          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882, icon: "🍞", hours: "07:00 - 17:00" }
         ]
       },
       "Desserts & Boba": {
         color: "#5AC8FA",
         icon: "🍦",
         items: [
-          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨" },
-          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961, icon: "🧋" },
-          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908, icon: "🧋" },
-          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941, icon: "🫖" },
-          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803, icon: "🍪" }
+          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨", hours: "12:00 - 00:00" },
+          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961, icon: "🧋", hours: "11:00 - 21:30" },
+          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908, icon: "🧋", hours: "12:00 - 20:00" },
+          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941, icon: "🫖", hours: "12:00 - 23:00" },
+          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803, icon: "🍪", hours: "08:00 - 20:00" }
         ]
       },
       "Shopping": {
         color: "#007AFF",
         icon: "🛍️",
         items: [
-          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️" },
-          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️" },
-          { name: "SoHo", lat: 40.7233, lng: -74.0030, icon: "🛍️" }
+          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️", hours: "07:00 - 22:00" },
+          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️", hours: "10:00 - 20:00" },
+          { name: "SoHo", lat: 40.7233, lng: -74.0030, icon: "🛍️", hours: "10:00 - 20:00" }
         ]
       }
     };
@@ -272,6 +280,7 @@
 
     Object.keys(placesData).forEach(catName => {
       const cat = placesData[catName];
+      const safeCatId = sanitizeId(catName);
       markerStore[catName] = [];
 
       // UI Category Box
@@ -283,7 +292,7 @@
       header.innerHTML = `
         <span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span>
         <label class="switch" onclick="event.stopPropagation()">
-          <input type="checkbox" checked id="cat-toggle-${catName}">
+          <input type="checkbox" checked id="cat-toggle-${safeCatId}">
           <span class="slider"></span>
         </label>
       `;
@@ -300,24 +309,36 @@
         const itemIcon = item.icon || cat.icon;
         const icon = createCustomIcon(cat.color, itemIcon);
         const marker = L.marker([item.lat, item.lng], { icon: icon });
-        marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`);
+
+        // Infobulle avec Horaires si disponible
+        let popupText = `<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`;
+        if (item.hours) {
+          popupText += `<br><small>🕒 <b>Horaires :</b> ${item.hours}</small>`;
+        }
+        marker.bindPopup(popupText);
         marker.addTo(map);
 
-        markerStore[catName].push({ marker, id: `${catName}-${idx}` });
+        markerStore[catName].push({ marker, id: `${safeCatId}-${idx}` });
+
+        // Ligne dans le menu latéral avec sous-titre Horaires
+        const hoursHTML = item.hours ? `<div class="item-hours">🕒 ${item.hours}</div>` : '';
 
         const row = document.createElement('div');
         row.className = 'item-row';
         row.innerHTML = `
-          <span>${itemIcon} ${item.name} ${badgeHTML}</span>
+          <div class="item-info">
+            <span>${itemIcon} ${item.name} ${badgeHTML}</span>
+            ${hoursHTML}
+          </div>
           <label class="switch">
-            <input type="checkbox" checked id="item-toggle-${catName}-${idx}">
+            <input type="checkbox" checked id="item-toggle-${safeCatId}-${idx}">
             <span class="slider"></span>
           </label>
         `;
         itemsDiv.appendChild(row);
 
         setTimeout(() => {
-          document.getElementById(`item-toggle-${catName}-${idx}`).addEventListener('change', (e) => {
+          document.getElementById(`item-toggle-${safeCatId}-${idx}`).addEventListener('change', (e) => {
             if (e.target.checked) map.addLayer(marker);
             else map.removeLayer(marker);
           });
@@ -329,10 +350,10 @@
       container.appendChild(catGroup);
 
       setTimeout(() => {
-        document.getElementById(`cat-toggle-${catName}`).addEventListener('change', (e) => {
+        document.getElementById(`cat-toggle-${safeCatId}`).addEventListener('change', (e) => {
           const checked = e.target.checked;
           markerStore[catName].forEach((obj, idx) => {
-            document.getElementById(`item-toggle-${catName}-${idx}`).checked = checked;
+            document.getElementById(`item-toggle-${safeCatId}-${idx}`).checked = checked;
             if (checked) map.addLayer(obj.marker);
             else map.removeLayer(obj.marker);
           });
