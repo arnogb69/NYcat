@@ -107,103 +107,131 @@
   <script>
     // --- 1. DONNÉES DES LIEUX ---
     const placesData = {
-      "Hotel": {
+      "Hôtel": {
         color: "#FF3B30",
+        icon: "🏨",
         items: [
           { name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }
         ]
       },
-      "Attractions Principales": {
+      "🛍️ Boutiques & Expériences": {
         color: "#5856D6",
+        icon: "🛍️",
         items: [
-          { name: "High Line", lat: 40.7480, lng: -74.0048, free: true },
-          { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true },
-          { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true },
-          { name: "Coney Island", lat: 40.5755, lng: -73.9827 },
-          { name: "Central Park (Fountain/Boat Pond)", lat: 40.7744, lng: -73.9708, free: true },
-          { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true },
-          { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true },
-          { name: "Spectacle Gospel", lat: 40.8078, lng: -73.9456, price: true },
-          { name: "Times Square", lat: 40.7580, lng: -73.9855 },
-          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790 },
-          { name: "M&M's World", lat: 40.7596, lng: -73.9845 },
-          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893 },
-          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772 },
-          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729 },
-          { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866 },
-          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true },
-          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822 },
-          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true },
-          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true },
-          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true },
-          { name: "Flatiron by night", lat: 40.7411, lng: -73.9897 },
-          { name: "Bryant Park", lat: 40.7536, lng: -73.9832 },
-          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772 }
+          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄" },
+          { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" },
+          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡" },
+          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" },
+          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸" }
         ]
       },
-      "Food": {
-        color: "#FF9500",
+      "🎟️ Spectacles & Musées": {
+        color: "#5856D6",
+        icon: "🎟️",
         items: [
-          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832 },
-          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960 },
-          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906 },
-          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897 },
-          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868 },
-          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902 },
-          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012 },
-          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792 },
-          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874 },
-          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835 }
+          { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866, icon: "🎭" },
+          { name: "Spectacle Gospel", lat: 40.8078, lng: -73.9456, price: true, icon: "🎵" },
+          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕" },
+          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢" }
         ]
       },
-      "Brunch": {
-        color: "#FF2D55",
+      "🗽 Monuments & Vues": {
+        color: "#5856D6",
+        icon: "🗽",
         items: [
-          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976 },
-          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871 }
+          { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true, icon: "🗽" },
+          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true, icon: "🏙️" },
+          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true, icon: "🕊️" }
         ]
       },
-      "Bagels": {
-        color: "#AF52DE",
+      "🌳 Parcs, Promenades & Quartiers": {
+        color: "#5856D6",
+        icon: "🌳",
         items: [
-          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822 },
-          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088 },
-          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687 }
+          { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" },
+          { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true, icon: "🌊" },
+          { name: "Central Park (Fountain/Boat Pond)", lat: 40.7744, lng: -73.9708, free: true, icon: "🌲" },
+          { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇" },
+          { name: "Flatiron by night", lat: 40.7411, lng: -73.9897, icon: "🧱" },
+          { name: "Bryant Park", lat: 40.7536, lng: -73.9832, icon: "☕" },
+          { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true, icon: "🚢" },
+          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772, icon: "🚉" },
+          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822, icon: "📚" },
+          { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true, icon: "🌉" },
+          { name: "Coney Island", lat: 40.5755, lng: -73.9827, icon: "🎡" }
         ]
       },
       "Pizza": {
         color: "#CC2B1D",
+        icon: "🍕",
         items: [
-          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021 },
-          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031 },
-          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945 }
+          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" },
+          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕" },
+          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945, icon: "🍕" }
         ]
       },
-      "Shopping": {
-        color: "#007AFF",
+      "Bagels": {
+        color: "#AF52DE",
+        icon: "🥯",
         items: [
-          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048 },
-          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022 },
-          { name: "SoHo", lat: 40.7233, lng: -74.0030 }
+          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" },
+          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯" },
+          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687, icon: "🥯" }
+        ]
+      },
+      "Brunch": {
+        color: "#FF2D55",
+        icon: "🍳",
+        items: [
+          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳" },
+          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳" }
+        ]
+      },
+      "Food / Restos": {
+        color: "#FF9500",
+        icon: "🍔",
+        items: [
+          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔" },
+          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960, icon: "🍝" },
+          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906, icon: "🍜" },
+          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897, icon: "🍽️" },
+          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868, icon: "🥢" },
+          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902, icon: "🍜" },
+          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012, icon: "🍣" },
+          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792, icon: "🥙" },
+          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" },
+          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835, icon: "🌯" }
         ]
       },
       "Bakeries": {
         color: "#34C759",
+        icon: "🥐",
         items: [
-          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833 },
-          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015 },
-          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912 },
-          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882 }
+          { name: "Junior's Cheesecake (Times Square)", lat: 40.7583, lng: -73.9863, icon: "🍰" },
+          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833, icon: "🥐" },
+          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015, icon: "🧁" },
+          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912, icon: "🥮" },
+          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882, icon: "🍞" }
         ]
       },
-      "Desserts": {
+      "Desserts & Boba": {
         color: "#5AC8FA",
+        icon: "🍦",
         items: [
-          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886 },
-          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961 },
-          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908 },
-          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941 },
-          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803 }
+          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨" },
+          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961, icon: "🧋" },
+          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908, icon: "🧋" },
+          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941, icon: "🫖" },
+          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803, icon: "🍪" }
+        ]
+      },
+      "Shopping": {
+        color: "#007AFF",
+        icon: "🛍️",
+        items: [
+          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️" },
+          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️" },
+          { name: "SoHo", lat: 40.7233, lng: -74.0030, icon: "🛍️" }
         ]
       }
     };
@@ -253,7 +281,7 @@
       const header = document.createElement('div');
       header.className = 'category-header';
       header.innerHTML = `
-        <span style="color:${cat.color}">${catName} (${cat.items.length})</span>
+        <span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span>
         <label class="switch" onclick="event.stopPropagation()">
           <input type="checkbox" checked id="cat-toggle-${catName}">
           <span class="slider"></span>
@@ -268,11 +296,11 @@
         let badgeHTML = '';
         if (item.price) badgeHTML += '<span class="badge-price">$</span>';
         if (item.free) badgeHTML += '<span class="badge-free">Gratuit</span>';
-        if (item.freeNote) badgeHTML += '<span class="badge-free">' + item.freeNote + '</span>';
 
-        const icon = createCustomIcon(cat.color, item.icon);
+        const itemIcon = item.icon || cat.icon;
+        const icon = createCustomIcon(cat.color, itemIcon);
         const marker = L.marker([item.lat, item.lng], { icon: icon });
-        marker.bindPopup(`<b>${item.name}</b><br><small>${catName}</small>`);
+        marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`);
         marker.addTo(map);
 
         markerStore[catName].push({ marker, id: `${catName}-${idx}` });
@@ -280,7 +308,7 @@
         const row = document.createElement('div');
         row.className = 'item-row';
         row.innerHTML = `
-          <span>${item.name} ${badgeHTML}</span>
+          <span>${itemIcon} ${item.name} ${badgeHTML}</span>
           <label class="switch">
             <input type="checkbox" checked id="item-toggle-${catName}-${idx}">
             <span class="slider"></span>
