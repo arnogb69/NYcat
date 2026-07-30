@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NYC Map - Offline</title>
+  
+  <!-- Manifest & iOS PWA Setup -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NYC Map">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    html, body, #map { width: 100%; height: 100%; overflow: hidden; background: #242424; }
+
+    /* Control Panel UI */
+    #panel-toggle {
+      position: absolute; top: 12px; right: 12px; z-index: 1000;
+      background: #1c1c1e; color: #fff; border: none; padding: 10px 14px;
+      border-radius: 12px; font-size: 14px; font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+
+    #geolocation-btn {
+      position: absolute; bottom: 24px; right: 12px; z-index: 1000;
+      background: #007aff; color: white; border: none; width: 48px; height: 48px;
+      border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 20px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    #sidebar {
+      position: absolute; top: 0; right: -100%; width: 85%; max-width: 360px; height: 100%;
+      background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 1001; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: #fff;
+      display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+    }
+    #sidebar.active { right: 0; }
+
+    .sidebar-header {
+      padding: 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .sidebar-header h2 { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; }
+
+    .sidebar-content { padding: 12px 16px; overflow-y: auto; flex: 1; }
+
+    .category-group { margin-bottom: 16px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+    .category-header {
+      padding: 12px; display: flex; justify-content: space-between; align-items: center;
+      font-weight: 600; font-size: 14px; cursor: pointer; background: rgba(255,255,255,0.03);
+    }
+    .category-items { display: none; padding: 6px 12px 12px 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .category-group.open .category-items { display: block; }
+
+    .item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #d1d1d6; }
+    
+    /* Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3a3a3c; transition: .2s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .2s; border-radius: 50%; }
+    input:checked + .slider { background-color: #34c759; }
+    input:checked + .slider:before { transform: translateX(16px); }
+
+    .badge-price { background: #ff9500; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
+    .badge-free { background: #30d158; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
+    
+    /* Subway Layer Overlay Style */
+    .subway-control { margin-bottom: 16px; padding: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid #0a84ff; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <button id="panel-toggle">⚙️ Filtres</button>
+  <button id="geolocation-btn" title="Ma Position">🎯</button>
+
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h2>Filtres NYC</h2>
+      <button class="close-btn" id="panel-close">✕</button>
+    </div>
+    <div class="sidebar-content">
+      
+      <!-- Option Métro MTA -->
+      <div class="subway-control">
+        <span>🚇 Calque Métro MTA</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-subway" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="categories-container"></div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // --- 1. DONNÉES DES LIEUX ---
+    const placesData = {
+      "Hotel": {
+        color: "#FF3B30",
+        items: [
+          { name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }
+        ]
+      },
+      "Attractions Principales": {
+        color: "#5856D6",
+        items: [
+          { name: "High Line", lat: 40.7480, lng: -74.0048, free: true },
+          { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true },
+          { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true },
+          { name: "Coney Island", lat: 40.5755, lng: -73.9827 },
+          { name: "Central Park (Fountain/Boat Pond)", lat: 40.7744, lng: -73.9708, free: true },
+          { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true },
+          { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true },
+          { name: "Spectacle Gospel", lat: 40.8078, lng: -73.9456, price: true },
+          { name: "Times Square", lat: 40.7580, lng: -73.9855 },
+          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790 },
+          { name: "M&M's World", lat: 40.7596, lng: -73.9845 },
+          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893 },
+          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772 },
+          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729 },
+          { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866 },
+          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true },
+          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822 },
+          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true },
+          { name: "MoMA", lat: 40.7614, lng: -73.9776, price: true, freeNote: "Free" },
+          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true },
+          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true },
+          { name: "Flatiron by night", lat: 40.7411, lng: -73.9897 },
+          { name: "Bryant Park", lat: 40.7536, lng: -73.9832 },
+          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772 },
+          { name: "MET", lat: 40.7794, lng: -73.9632, price: true, freeNote: "Free" }
+        ]
+      },
+      "Food": {
+        color: "#FF9500",
+        items: [
+          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960 },
+          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906 },
+          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897 },
+          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868 },
+          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902 },
+          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012 },
+          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792 },
+          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874 },
+          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835 }
+        ]
+      },
+      "Brunch": {
+        color: "#FF2D55",
+        items: [
+          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976 },
+          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871 }
+        ]
+      },
+      "Bagels": {
+        color: "#AF52DE",
+        items: [
+          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822 },
+          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088 },
+          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687 }
+        ]
+      },
+      "Pizza": {
+        color: "#CC2B1D",
+        items: [
+          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021 },
+          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031 },
+          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945 }
+        ]
+      },
+      "Shopping": {
+        color: "#007AFF",
+        items: [
+          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048 },
+          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022 },
+          { name: "SoHo", lat: 40.7233, lng: -74.0030 }
+        ]
+      },
+      "Bakeries": {
+        color: "#34C759",
+        items: [
+          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833 },
+          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015 },
+          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912 },
+          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882 }
+        ]
+      },
+      "Desserts": {
+        color: "#5AC8FA",
+        items: [
+          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886 },
+          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961 },
+          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908 },
+          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941 },
+          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803 }
+        ]
+      }
+    };
+
+    // --- 2. INITIALISATION DE LA CARTE ---
+    const map = L.map('map', {
+      center: [40.7400, -73.9800],
+      zoom: 12,
+      zoomControl: false
+    });
+
+    // Tuiles OpenStreetMap (mises en cache via Service Worker)
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Overlay du réseau Métro MTA (CartoDB Light / OpenRailway Map)
+    const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      opacity: 0.75
+    }).addTo(map);
+
+    document.getElementById('toggle-subway').addEventListener('change', (e) => {
+      if (e.target.checked) map.addLayer(subwayLayer);
+      else map.removeLayer(subwayLayer);
+    });
+
+    // --- 3. DESSIN DES MARQUEURS ---
+    const markerStore = {};
+
+    function createCustomIcon(color, emoji) {
+      const html = `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`;
+      return L.divIcon({ html: html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+    }
+
+    const container = document.getElementById('categories-container');
+
+    Object.keys(placesData).forEach(catName => {
+      const cat = placesData[catName];
+      markerStore[catName] = [];
+
+      // UI Category Box
+      const catGroup = document.createElement('div');
+      catGroup.className = 'category-group';
+      
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.innerHTML = `
+        <span style="color:${cat.color}">${catName} (${cat.items.length})</span>
+        <label class="switch" onclick="event.stopPropagation()">
+          <input type="checkbox" checked id="cat-toggle-${catName}">
+          <span class="slider"></span>
+        </label>
+      `;
+      header.onclick = () => catGroup.classList.toggle('open');
+
+      const itemsDiv = document.createElement('div');
+      itemsDiv.className = 'category-items';
+
+      cat.items.forEach((item, idx) => {
+        // Build badges
+        let badgeHTML = '';
+        if (item.price) badgeHTML += '<span class="badge-price">$</span>';
+        if (item.free) badgeHTML += '<span class="badge-free">Gratuit</span>';
+        if (item.freeNote) badgeHTML += '<span class="badge-free">' + item.freeNote + '</span>';
+
+        // Marker Leaflet
+        const icon = createCustomIcon(cat.color, item.icon);
+        const marker = L.marker([item.lat, item.lng], { icon: icon });
+        marker.bindPopup(`<b>${item.name}</b><br><small>${catName}</small>`);
+        marker.addTo(map);
+
+        markerStore[catName].push({ marker, id: `${catName}-${idx}` });
+
+        // Item row UI
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <span>${item.name} ${badgeHTML}</span>
+          <label class="switch">
+            <input type="checkbox" checked id="item-toggle-${catName}-${idx}">
+            <span class="slider"></span>
+          </label>
+        `;
+        itemsDiv.appendChild(row);
+
+        // Item checkbox listener
+        setTimeout(() => {
+          document.getElementById(`item-toggle-${catName}-${idx}`).addEventListener('change', (e) => {
+            if (e.target.checked) map.addLayer(marker);
+            else map.removeLayer(marker);
+          });
+        }, 0);
+      });
+
+      catGroup.appendChild(header);
+      catGroup.appendChild(itemsDiv);
+      container.appendChild(catGroup);
+
+      // Category global toggle listener
+      setTimeout(() => {
+        document.getElementById(`cat-toggle-${catName}`).addEventListener('change', (e) => {
+          const checked = e.target.checked;
+          markerStore[catName].forEach((obj, idx) => {
+            document.getElementById(`item-toggle-${catName}-${idx}`).checked = checked;
+            if (checked) map.addLayer(obj.marker);
+            else map.removeLayer(obj.marker);
+          });
+        });
+      }, 0);
+    });
+
+    // --- 4. GÉOLOCALISATION SANS DATA ---
+    let userMarker = null;
+    document.getElementById('geolocation-btn').addEventListener('click', () => {
+      map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
+    });
+
+    map.on('locationfound', (e) => {
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.circleMarker(e.latlng, {
+        radius: 8, fillColor: "#007AFF", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.9
+      }).addTo(map);
+      userMarker.bindPopup("Vous êtes ici").openPopup();
+    });
+
+    map.on('locationerror', () => {
+      alert("Impossible de récupérer la position GPS. Vérifiez les autorisations iOS.");
+    });
+
+    // --- 5. GESTION UI SIDEBAR ---
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('panel-toggle').onclick = () => sidebar.classList.add('active');
+    document.getElementById('panel-close').onclick = () => sidebar.classList.remove('active');
+
+    // --- 6. ENREGISTREMENT SERVICE WORKER (HORS LIGNE) ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Fail', err));
+    }
+  </script>
+</body>
+</html>
