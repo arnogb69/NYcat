@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NYC Map - Offline</title>
+  <title>NYC Map & Planning</title>
   
-  <!-- Manifest & iOS PWA Setup -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="NYC Map">
   
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body, #map { width: 100%; height: 100%; overflow: hidden; background: #242424; }
 
-    /* Control Panel UI */
+    /* Buttons */
     #panel-toggle {
       position: absolute; top: 12px; right: 12px; z-index: 1000;
       background: #1c1c1e; color: #fff; border: none; padding: 10px 14px;
@@ -32,28 +30,33 @@
       display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
 
+    /* Sidebar Navigation */
     #sidebar {
-      position: absolute; top: 0; right: -100%; width: 85%; max-width: 360px; height: 100%;
-      background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%;
+      background: rgba(28, 28, 30, 0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       z-index: 1001; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: #fff;
       display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5);
     }
     #sidebar.active { right: 0; }
 
     .sidebar-header {
-      padding: 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
       display: flex; justify-content: space-between; align-items: center;
     }
     .sidebar-header h2 { font-size: 18px; font-weight: 700; }
     .close-btn { background: none; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; }
 
-    .sidebar-content { padding: 12px 16px; overflow-y: auto; flex: 1; }
+    /* Nav Tabs */
+    .nav-tabs { display: flex; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: #8e8e93; font-weight: 600; font-size: 14px; cursor: pointer; }
+    .tab-btn.active { color: #0a84ff; border-bottom: 2px solid #0a84ff; background: rgba(10,132,255,0.1); }
 
-    .category-group { margin-bottom: 16px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
-    .category-header {
-      padding: 12px; display: flex; justify-content: space-between; align-items: center;
-      font-weight: 600; font-size: 14px; cursor: pointer; background: rgba(255,255,255,0.03);
-    }
+    .tab-content { display: none; padding: 12px 16px; overflow-y: auto; flex: 1; }
+    .tab-content.active { display: block; }
+
+    /* Category & Controls UI */
+    .category-group { margin-bottom: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+    .category-header { padding: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; cursor: pointer; }
     .category-items { display: none; padding: 6px 12px 12px 12px; border-top: 1px solid rgba(255,255,255,0.05); }
     .category-group.open .category-items { display: block; }
 
@@ -71,26 +74,42 @@
 
     .badge-price { background: #ff9500; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
     .badge-free { background: #30d158; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
+
+    .subway-control { margin-bottom: 12px; padding: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid #0a84ff; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Planning Day Design */
+    .day-card { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
+    .day-title { font-size: 16px; font-weight: 700; color: #0a84ff; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .time-block { margin-top: 8px; }
+    .time-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #8e8e93; margin-bottom: 4px; }
+    .activity-list { list-style: none; padding-left: 0; }
+    .activity-item { font-size: 13px; padding: 4px 0; color: #e5e5ea; display: flex; align-items: center; gap: 6px; }
     
-    /* Subway Layer Overlay Style */
-    .subway-control { margin-bottom: 16px; padding: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid #0a84ff; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+    /* Transport Badge */
+    .transit-info { font-size: 11px; background: rgba(255, 255, 255, 0.08); color: #ffd60a; padding: 4px 8px; border-radius: 6px; margin: 6px 0; display: inline-flex; align-items: center; gap: 5px; }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
 
-  <button id="panel-toggle">⚙️ Filtres</button>
+  <button id="panel-toggle">⚙️ Menu & Planning</button>
   <button id="geolocation-btn" title="Ma Position">🎯</button>
 
   <div id="sidebar">
     <div class="sidebar-header">
-      <h2>Filtres NYC</h2>
+      <h2>NYC Trip</h2>
       <button class="close-btn" id="panel-close">✕</button>
     </div>
-    <div class="sidebar-content">
-      
-      <!-- Option Métro MTA -->
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tab-btn-filters">🗺️ Filtres Carte</button>
+      <button class="tab-btn" id="tab-btn-planning">📅 Planning & Trajets</button>
+    </div>
+
+    <!-- TAB 1: FILTRES -->
+    <div class="tab-content active" id="tab-filters">
       <div class="subway-control">
         <span>🚇 Calque Métro MTA</span>
         <label class="switch">
@@ -98,32 +117,196 @@
           <span class="slider"></span>
         </label>
       </div>
-
       <div id="categories-container"></div>
+    </div>
+
+    <!-- TAB 2: PLANNING -->
+    <div class="tab-content" id="tab-planning">
+      
+      <!-- Samedi -->
+      <div class="day-card">
+        <div class="day-title"><span>Samedi</span> <small>Arrivée</small></div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">✈️ Départ 08h43 ➔ Arrivée 12h10</li>
+            <li class="activity-item">🏨 Check-in: The Allen Hotel (Lower East Side)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚇 Métro F (Delancey St ➔ Rockefeller Ctr) ~20 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🌇 Times Square</li>
+            <li class="activity-item">🍄 Nintendo New York</li>
+            <li class="activity-item">🧱 LEGO Store</li>
+            <li class="activity-item">🍬 M&M's World</li>
+            <li class="activity-item">🧸 FAO Schwarz</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Dimanche -->
+      <div class="day-card">
+        <div class="day-title"><span>Dimanche</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F/J (Delancey ➔ Whitehall) ~18 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🗽 Statue de la Liberté ($)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚶 Marche Battery Park ➔ Seaport ~15 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🚢 Seaport District</li>
+            <li class="activity-item">🌉 Ponts de Brooklyn & Manhattan (Gratuit)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Lundi -->
+      <div class="day-card">
+        <div class="day-title"><span>Lundi</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 14th St) ~15 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🌿 High Line (Gratuit)</li>
+            <li class="activity-item">🌊 Little Island (Gratuit)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚶 Marche vers Hudson Yards / Chelsea ~10 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">📐 Edge NYC (Hudson Yards) ($)</li>
+            <li class="activity-item">🛍️ Chelsea Market</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Mardi -->
+      <div class="day-card">
+        <div class="day-title"><span>Mardi</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F/B/D (Delancey ➔ 59 St) ~22 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🛍️ 5th Avenue</li>
+            <li class="activity-item">🌲 Central Park (Fountain/Boat Pond)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚶 Balade & Shopping à pied</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🏙️ Manhattan / Shopping</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Mercredi -->
+      <div class="day-card">
+        <div class="day-title"><span>Mercredi</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro B/D (Grand St ➔ 34th St) ~12 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🏙️ Empire State Building ($)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚇 Métro R/W ou 🚶 Marche ~15 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🎵 Gospel</li>
+            <li class="activity-item">🧱 Flatiron Building</li>
+            <li class="activity-item">⚡ Harry Potter Store</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Jeudi -->
+      <div class="day-card">
+        <div class="day-title"><span>Jeudi</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F Direct (Delancey ➔ Coney Island) ~50 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🎡 Coney Island</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚇 Métro F Retour (Coney Island ➔ Bryant Park) ~50 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🚉 Grand Central Terminal</li>
+            <li class="activity-item">📚 Bibliothèque (Winnie l'Ourson)</li>
+            <li class="activity-item">☕ Bryant Park</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Vendredi -->
+      <div class="day-card">
+        <div class="day-title"><span>Vendredi</span></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro J/Z (Essex St ➔ Broad St) ou 🚶 Marche ~20 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🕊️ Ground Zero / One World ($)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚇 Métro E/W (WTC ➔ Times Square) ~15 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi / Soir</div>
+          <ul class="activity-list">
+            <li class="activity-item">🎭 Broadway - Aladdin</li>
+            <li class="activity-item">🌇 Times Square by night</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Samedi (Départ) -->
+      <div class="day-card">
+        <div class="day-title"><span>Samedi</span> <small>Départ</small></div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 50 St) ~20 min</div>
+        <div class="time-block">
+          <div class="time-title">Matin</div>
+          <ul class="activity-list">
+            <li class="activity-item">🚢 Intrepid Museum ($)</li>
+          </ul>
+        </div>
+        <div class="transit-info">🚕 Taxi / Uber ou NJ Transit vers Newark ~45-60 min</div>
+        <div class="time-block">
+          <div class="time-title">Après-midi</div>
+          <ul class="activity-list">
+            <li class="activity-item">🛫 Départ NY (BOX: 15h00)</li>
+            <li class="activity-item">✈️ Vol Newark : 18h40</li>
+          </ul>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // --- Fonction de nettoyage d'identifiant ---
     function sanitizeId(str) {
       return str.replace(/[^a-zA-Z0-9_-]/g, '_');
     }
 
-    // --- 1. DONNÉES DES LIEUX (AVEC HORAIRES POUR LES MAGASINS ET EDGE) ---
+    // --- DONNÉES DES LIEUX ---
     const placesData = {
       "Hôtel": {
-        color: "#FF3B30",
-        icon: "🏨",
-        items: [
-          { name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }
-        ]
+        color: "#FF3B30", icon: "🏨",
+        items: [{ name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }]
       },
       "Boutiques & Expériences": {
-        color: "#5856D6",
-        icon: "🛍️",
+        color: "#5856D6", icon: "🛍️",
         items: [
           { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄", hours: "10:00 - 20:00" },
           { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬", hours: "10:00 - 22:00" },
@@ -133,8 +316,7 @@
         ]
       },
       "Spectacles & Musées": {
-        color: "#5856D6",
-        icon: "🎟️",
+        color: "#5856D6", icon: "🎟️",
         items: [
           { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866, icon: "🎭" },
           { name: "Spectacle Gospel", lat: 40.8078, lng: -73.9456, price: true, icon: "🎵" },
@@ -143,8 +325,7 @@
         ]
       },
       "Monuments & Vues": {
-        color: "#5856D6",
-        icon: "🗽",
+        color: "#5856D6", icon: "🗽",
         items: [
           { name: "Edge NYC (Hudson Yards)", lat: 40.7538, lng: -74.0022, price: true, icon: "📐", hours: "09:00 - 22:00" },
           { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true, icon: "🗽" },
@@ -153,8 +334,7 @@
         ]
       },
       "Parcs, Promenades & Quartiers": {
-        color: "#5856D6",
-        icon: "🌳",
+        color: "#5856D6", icon: "🌳",
         items: [
           { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" },
           { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true, icon: "🌊" },
@@ -170,8 +350,7 @@
         ]
       },
       "Pizza": {
-        color: "#CC2B1D",
-        icon: "🍕",
+        color: "#CC2B1D", icon: "🍕",
         items: [
           { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕", hours: "10:00 - 04:00" },
           { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕", hours: "11:30 - 23:30" },
@@ -179,8 +358,7 @@
         ]
       },
       "Bagels": {
-        color: "#AF52DE",
-        icon: "🥯",
+        color: "#AF52DE", icon: "🥯",
         items: [
           { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯", hours: "07:00 - 15:00" },
           { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯", hours: "06:00 - 16:00" },
@@ -188,16 +366,14 @@
         ]
       },
       "Brunch": {
-        color: "#FF2D55",
-        icon: "🍳",
+        color: "#FF2D55", icon: "🍳",
         items: [
           { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳", hours: "08:30 - 22:00" },
           { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳", hours: "17:00 - 00:00" }
         ]
       },
       "Food / Restos": {
-        color: "#FF9500",
-        icon: "🍔",
+        color: "#FF9500", icon: "🍔",
         items: [
           { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔", hours: "07:00 - 00:00" },
           { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960, icon: "🍝", hours: "11:30 - 23:00" },
@@ -212,8 +388,7 @@
         ]
       },
       "Bakeries": {
-        color: "#34C759",
-        icon: "🥐",
+        color: "#34C759", icon: "🥐",
         items: [
           { name: "Junior's Cheesecake (Times Square)", lat: 40.7583, lng: -73.9863, icon: "🍰", hours: "07:00 - 00:00" },
           { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833, icon: "🥐", hours: "08:00 - 18:00" },
@@ -223,8 +398,7 @@
         ]
       },
       "Desserts & Boba": {
-        color: "#5AC8FA",
-        icon: "🍦",
+        color: "#5AC8FA", icon: "🍦",
         items: [
           { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨", hours: "12:00 - 00:00" },
           { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961, icon: "🧋", hours: "11:00 - 21:30" },
@@ -234,8 +408,7 @@
         ]
       },
       "Shopping": {
-        color: "#007AFF",
-        icon: "🛍️",
+        color: "#007AFF", icon: "🛍️",
         items: [
           { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️", hours: "07:00 - 22:00" },
           { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️", hours: "10:00 - 20:00" },
@@ -244,58 +417,34 @@
       }
     };
 
-    // --- 2. INITIALISATION DE LA CARTE ---
-    const map = L.map('map', {
-      center: [40.7400, -73.9800],
-      zoom: 12,
-      zoomControl: false
-    });
+    // --- CARTE LEAFLET ---
+    const map = L.map('map', { center: [40.7400, -73.9800], zoom: 12, zoomControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
 
-    // Tuiles OpenStreetMap
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    // Overlay Métro MTA
-    const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      opacity: 0.75
-    }).addTo(map);
-
+    const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.75 }).addTo(map);
     document.getElementById('toggle-subway').addEventListener('change', (e) => {
       if (e.target.checked) map.addLayer(subwayLayer);
       else map.removeLayer(subwayLayer);
     });
 
-    // --- 3. DESSIN DES MARQUEURS ---
+    // --- ICONES & FILTRES ---
     const markerStore = {};
-
     function createCustomIcon(color, emoji) {
       const html = `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`;
       return L.divIcon({ html: html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
     }
 
     const container = document.getElementById('categories-container');
-
     Object.keys(placesData).forEach(catName => {
       const cat = placesData[catName];
       const safeCatId = sanitizeId(catName);
       markerStore[catName] = [];
 
-      // UI Category Box
       const catGroup = document.createElement('div');
       catGroup.className = 'category-group';
-      
       const header = document.createElement('div');
       header.className = 'category-header';
-      header.innerHTML = `
-        <span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span>
-        <label class="switch" onclick="event.stopPropagation()">
-          <input type="checkbox" checked id="cat-toggle-${safeCatId}">
-          <span class="slider"></span>
-        </label>
-      `;
+      header.innerHTML = `<span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" checked id="cat-toggle-${safeCatId}"><span class="slider"></span></label>`;
       header.onclick = () => catGroup.classList.toggle('open');
 
       const itemsDiv = document.createElement('div');
@@ -310,31 +459,17 @@
         const icon = createCustomIcon(cat.color, itemIcon);
         const marker = L.marker([item.lat, item.lng], { icon: icon });
 
-        // Infobulle avec Horaires si disponible
         let popupText = `<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`;
-        if (item.hours) {
-          popupText += `<br><small>🕒 <b>Horaires :</b> ${item.hours}</small>`;
-        }
+        if (item.hours) popupText += `<br><small>🕒 <b>Horaires :</b> ${item.hours}</small>`;
         marker.bindPopup(popupText);
         marker.addTo(map);
 
         markerStore[catName].push({ marker, id: `${safeCatId}-${idx}` });
 
-        // Ligne dans le menu latéral avec sous-titre Horaires
         const hoursHTML = item.hours ? `<div class="item-hours">🕒 ${item.hours}</div>` : '';
-
         const row = document.createElement('div');
         row.className = 'item-row';
-        row.innerHTML = `
-          <div class="item-info">
-            <span>${itemIcon} ${item.name} ${badgeHTML}</span>
-            ${hoursHTML}
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked id="item-toggle-${safeCatId}-${idx}">
-            <span class="slider"></span>
-          </label>
-        `;
+        row.innerHTML = `<div class="item-info"><span>${itemIcon} ${item.name} ${badgeHTML}</span>${hoursHTML}</div><label class="switch"><input type="checkbox" checked id="item-toggle-${safeCatId}-${idx}"><span class="slider"></span></label>`;
         itemsDiv.appendChild(row);
 
         setTimeout(() => {
@@ -361,30 +496,39 @@
       }, 0);
     });
 
-    // --- 4. GÉOLOCALISATION SANS DATA ---
+    // --- GÉOLOCALISATION ---
     let userMarker = null;
-    document.getElementById('geolocation-btn').addEventListener('click', () => {
-      map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
-    });
-
+    document.getElementById('geolocation-btn').onclick = () => map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
     map.on('locationfound', (e) => {
       if (userMarker) map.removeLayer(userMarker);
-      userMarker = L.circleMarker(e.latlng, {
-        radius: 8, fillColor: "#007AFF", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.9
-      }).addTo(map);
+      userMarker = L.circleMarker(e.latlng, { radius: 8, fillColor: "#007AFF", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.9 }).addTo(map);
       userMarker.bindPopup("Vous êtes ici").openPopup();
     });
 
-    map.on('locationerror', () => {
-      alert("Impossible de récupérer la position GPS. Vérifiez les autorisations iOS.");
-    });
-
-    // --- 5. GESTION UI SIDEBAR ---
+    // --- UI NAVIGATION SIDEBAR & TABS ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('panel-toggle').onclick = () => sidebar.classList.add('active');
     document.getElementById('panel-close').onclick = () => sidebar.classList.remove('active');
 
-    // --- 6. ENREGISTREMENT SERVICE WORKER ---
+    const tabFiltersBtn = document.getElementById('tab-btn-filters');
+    const tabPlanningBtn = document.getElementById('tab-btn-planning');
+    const tabFilters = document.getElementById('tab-filters');
+    const tabPlanning = document.getElementById('tab-planning');
+
+    tabFiltersBtn.onclick = () => {
+      tabFiltersBtn.classList.add('active');
+      tabPlanningBtn.classList.remove('active');
+      tabFilters.classList.add('active');
+      tabPlanning.classList.remove('active');
+    };
+
+    tabPlanningBtn.onclick = () => {
+      tabPlanningBtn.classList.add('active');
+      tabFiltersBtn.classList.remove('active');
+      tabPlanning.classList.add('active');
+      tabFilters.classList.remove('active');
+    };
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Fail', err));
     }
