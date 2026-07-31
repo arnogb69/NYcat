@@ -123,7 +123,7 @@
     <!-- TAB 2: PLANNING -->
     <div class="tab-content" id="tab-planning">
       
-      <!-- Samedi -->
+      <!-- Samedi 1 -->
       <div class="day-card">
         <div class="day-title"><span>Samedi</span> <small>Arrivée</small></div>
         <div class="time-block">
@@ -252,14 +252,14 @@
       <!-- Vendredi -->
       <div class="day-card">
         <div class="day-title"><span>Vendredi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro J/Z (Essex St ➔ Broad St) ou 🚶 Marche ~20 min</div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 50 St) ~20 min</div>
         <div class="time-block">
           <div class="time-title">Matin</div>
           <ul class="activity-list">
-            <li class="activity-item">🕊️ Ground Zero / One World ($)</li>
+            <li class="activity-item">🚢 Intrepid Museum ($)</li>
           </ul>
         </div>
-        <div class="transit-info">🚇 Métro E/W (WTC ➔ Times Square) ~15 min</div>
+        <div class="transit-info">🚇 Métro C/E ou 🚶 Marche vers Times Square ~15 min</div>
         <div class="time-block">
           <div class="time-title">Après-midi / Soir</div>
           <ul class="activity-list">
@@ -272,11 +272,11 @@
       <!-- Samedi (Départ) -->
       <div class="day-card">
         <div class="day-title"><span>Samedi</span> <small>Départ</small></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 50 St) ~20 min</div>
+        <div class="transit-info">🏨 ➔ 🚇 Métro J/Z (Essex St ➔ Broad St) ou 🚶 Marche ~20 min</div>
         <div class="time-block">
           <div class="time-title">Matin</div>
           <ul class="activity-list">
-            <li class="activity-item">🚢 Intrepid Museum ($)</li>
+            <li class="activity-item">🕊️ Ground Zero / One World ($)</li>
           </ul>
         </div>
         <div class="transit-info">🚕 Taxi / Uber ou NJ Transit vers Newark ~45-60 min</div>
@@ -525,8 +525,8 @@
     tabPlanningBtn.onclick = () => {
       tabPlanningBtn.classList.add('active');
       tabFiltersBtn.classList.remove('active');
-      tabPlanning.classList.add('active');
       tabFilters.classList.remove('active');
+      tabPlanning.classList.add('active');
     };
 
     if ('serviceWorker' in navigator) {
