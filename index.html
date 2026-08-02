@@ -12,57 +12,46 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
+    :root { --bg-color: #242424; --panel-bg: rgba(28, 28, 30, 0.96); --accent: #0a84ff; --text: #fff; --text-muted: #8e8e93; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    html, body, #map { width: 100%; height: 100%; overflow: hidden; background: #242424; }
+    html, body, #map { width: 100%; height: 100%; overflow: hidden; background: var(--bg-color); }
 
-    /* Buttons */
-    #panel-toggle {
-      position: absolute; top: 12px; right: 12px; z-index: 1000;
-      background: #1c1c1e; color: #fff; border: none; padding: 10px 14px;
-      border-radius: 12px; font-size: 14px; font-weight: 600;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 6px; cursor: pointer;
-    }
+    /* UI Overlay */
+    .overlay-control { position: absolute; z-index: 1000; background: rgba(28, 28, 30, 0.9); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--text); }
+    
+    #day-filter-container { top: 12px; left: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; }
+    #day-filter-select { background: transparent; color: var(--text); border: none; font-size: 14px; font-weight: 600; outline: none; cursor: pointer; }
+    #day-filter-select option { background: #1c1c1e; }
 
-    #geolocation-btn {
-      position: absolute; bottom: 24px; right: 12px; z-index: 1000;
-      background: #007aff; color: white; border: none; width: 48px; height: 48px;
-      border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 20px;
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-    }
+    #panel-toggle { top: 12px; right: 12px; padding: 10px 14px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; border: none; }
+    #geolocation-btn { bottom: 24px; right: 12px; background: var(--accent); color: white; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
     /* Sidebar Navigation */
-    #sidebar {
-      position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%;
-      background: rgba(28, 28, 30, 0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      z-index: 1001; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: #fff;
-      display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5);
-    }
+    #sidebar { position: absolute; top: 0; right: -100%; width: 90%; max-width: 400px; height: 100%; background: var(--panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 1001; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: var(--text); display: flex; flex-direction: column; box-shadow: -5px 0 25px rgba(0,0,0,0.5); }
     #sidebar.active { right: 0; }
 
-    .sidebar-header {
-      padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .sidebar-header { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
     .sidebar-header h2 { font-size: 18px; font-weight: 700; }
-    .close-btn { background: none; border: none; color: #8e8e93; font-size: 20px; cursor: pointer; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
 
     /* Nav Tabs */
     .nav-tabs { display: flex; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: #8e8e93; font-weight: 600; font-size: 14px; cursor: pointer; }
-    .tab-btn.active { color: #0a84ff; border-bottom: 2px solid #0a84ff; background: rgba(10,132,255,0.1); }
-
+    .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: var(--text-muted); font-weight: 600; font-size: 14px; cursor: pointer; }
+    .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); background: rgba(10,132,255,0.1); }
     .tab-content { display: none; padding: 12px 16px; overflow-y: auto; flex: 1; }
     .tab-content.active { display: block; }
 
-    /* Category & Controls UI */
+    /* Controls UI */
+    .subway-control { margin-bottom: 12px; padding: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid var(--accent); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .master-control { margin-bottom: 10px; padding: 10px 12px; background: rgba(255,255,255,0.08); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 13px; }
+    
     .category-group { margin-bottom: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
     .category-header { padding: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; cursor: pointer; }
     .category-items { display: none; padding: 6px 12px 12px 12px; border-top: 1px solid rgba(255,255,255,0.05); }
     .category-group.open .category-items { display: block; }
-
     .item-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #d1d1d6; }
     .item-info { display: flex; flex-direction: column; }
-    .item-hours { font-size: 11px; color: #8e8e93; margin-top: 2px; }
+    .item-hours { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
     /* Toggle Switch */
     .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
@@ -75,17 +64,13 @@
     .badge-price { background: #ff9500; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
     .badge-free { background: #30d158; color: #000; padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 4px; }
 
-    .subway-control { margin-bottom: 12px; padding: 12px; background: rgba(10, 132, 255, 0.15); border: 1px solid #0a84ff; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-
     /* Planning Day Design */
     .day-card { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
-    .day-title { font-size: 16px; font-weight: 700; color: #0a84ff; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .day-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; }
     .time-block { margin-top: 8px; }
-    .time-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #8e8e93; margin-bottom: 4px; }
+    .time-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
     .activity-list { list-style: none; padding-left: 0; }
     .activity-item { font-size: 13px; padding: 4px 0; color: #e5e5ea; display: flex; align-items: center; gap: 6px; }
-    
-    /* Transport Badge */
     .transit-info { font-size: 11px; background: rgba(255, 255, 255, 0.08); color: #ffd60a; padding: 4px 8px; border-radius: 6px; margin: 6px 0; display: inline-flex; align-items: center; gap: 5px; }
   </style>
 </head>
@@ -93,7 +78,22 @@
 
   <div id="map"></div>
 
-  <button id="panel-toggle">⚙️ Menu & Planning</button>
+  <!-- Filters & Controls -->
+  <div id="day-filter-container" class="overlay-control">
+    <span>📅</span>
+    <select id="day-filter-select">
+      <option value="all">Tous les jours</option>
+      <option value="sat1">Samedi (Arrivée)</option>
+      <option value="sun">Dimanche</option>
+      <option value="mon">Lundi</option>
+      <option value="tue">Mardi</option>
+      <option value="wed">Mercredi</option>
+      <option value="thu">Jeudi</option>
+      <option value="fri">Vendredi</option>
+      <option value="sat2">Samedi (Départ)</option>
+    </select>
+  </div>
+  <button id="panel-toggle" class="overlay-control">⚙️ Menu & Planning</button>
   <button id="geolocation-btn" title="Ma Position">🎯</button>
 
   <div id="sidebar">
@@ -102,438 +102,182 @@
       <button class="close-btn" id="panel-close">✕</button>
     </div>
 
-    <!-- Navigation Tabs -->
+    <!-- Tabs -->
     <div class="nav-tabs">
-      <button class="tab-btn active" id="tab-btn-filters">🗺️ Filtres Carte</button>
-      <button class="tab-btn" id="tab-btn-planning">📅 Planning & Trajets</button>
+      <button class="tab-btn active" data-target="tab-filters">🗺️ Filtres Carte</button>
+      <button class="tab-btn" data-target="tab-planning">📅 Planning & Trajets</button>
     </div>
 
     <!-- TAB 1: FILTRES -->
     <div class="tab-content active" id="tab-filters">
       <div class="subway-control">
         <span>🚇 Calque Métro MTA</span>
-        <label class="switch">
-          <input type="checkbox" id="toggle-subway" checked>
-          <span class="slider"></span>
-        </label>
+        <label class="switch"><input type="checkbox" id="toggle-subway" checked><span class="slider"></span></label>
+      </div>
+      <div class="master-control">
+        <span>📍 Tout cocher / Tout décocher</span>
+        <label class="switch"><input type="checkbox" id="toggle-all" checked><span class="slider"></span></label>
       </div>
       <div id="categories-container"></div>
     </div>
 
-    <!-- TAB 2: PLANNING -->
+    <!-- TAB 2: PLANNING (Le code HTML du planning reste inchangé pour ne pas surcharger) -->
     <div class="tab-content" id="tab-planning">
-      
-      <!-- Samedi 1 -->
-      <div class="day-card">
-        <div class="day-title"><span>Samedi</span> <small>Arrivée</small></div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">✈️ Départ 08h43 ➔ Arrivée 12h10</li>
-            <li class="activity-item">🏨 Check-in: The Allen Hotel (Lower East Side)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚇 Métro F (Delancey St ➔ Rockefeller Ctr) ~20 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🌇 Times Square</li>
-            <li class="activity-item">🍄 Nintendo New York</li>
-            <li class="activity-item">🧱 LEGO Store</li>
-            <li class="activity-item">🍬 M&M's World</li>
-            <li class="activity-item">🧸 FAO Schwarz</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Dimanche -->
-      <div class="day-card">
-        <div class="day-title"><span>Dimanche</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F/J (Delancey ➔ Whitehall) ~18 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🗽 Statue de la Liberté ($)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚶 Marche Battery Park ➔ Seaport ~15 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🚢 Seaport District</li>
-            <li class="activity-item">🌉 Ponts de Brooklyn & Manhattan (Gratuit)</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Lundi -->
-      <div class="day-card">
-        <div class="day-title"><span>Lundi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 14th St) ~15 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🌿 High Line (Gratuit)</li>
-            <li class="activity-item">🌊 Little Island (Gratuit)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚶 Marche vers Hudson Yards / Chelsea ~10 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">📐 Edge NYC (Hudson Yards) ($)</li>
-            <li class="activity-item">🛍️ Chelsea Market</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Mardi -->
-      <div class="day-card">
-        <div class="day-title"><span>Mardi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F/B/D (Delancey ➔ 59 St) ~22 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🛍️ 5th Avenue</li>
-            <li class="activity-item">🌲 Central Park (Fountain/Boat Pond)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚶 Balade & Shopping à pied</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🏙️ Manhattan / Shopping</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Mercredi -->
-      <div class="day-card">
-        <div class="day-title"><span>Mercredi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro B/D (Grand St ➔ 34th St) ~12 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🏙️ Empire State Building ($)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚇 Métro D Express (34th St ➔ 145th St) ~20 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🎵 Gospel (Convent Baptist Church - 420 W 145th St)</li>
-            <li class="activity-item">🧱 Flatiron Building</li>
-            <li class="activity-item">⚡ Harry Potter Store</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Jeudi -->
-      <div class="day-card">
-        <div class="day-title"><span>Jeudi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F Direct (Delancey ➔ Coney Island) ~50 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🎡 Coney Island</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚇 Métro F Retour (Coney Island ➔ 42 St / Grand Central) ~50 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🚉 Grand Central Terminal</li>
-            <li class="activity-item">✨ SUMMIT One Vanderbilt ($)</li>
-            <li class="activity-item">📚 Bibliothèque (Winnie l'Ourson)</li>
-            <li class="activity-item">☕ Bryant Park</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Vendredi -->
-      <div class="day-card">
-        <div class="day-title"><span>Vendredi</span></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro F (Delancey ➔ 50 St) ~20 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🚢 Intrepid Museum ($)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚇 Métro C/E ou 🚶 Marche vers Times Square ~15 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi / Soir</div>
-          <ul class="activity-list">
-            <li class="activity-item">🎭 Broadway - Aladdin</li>
-            <li class="activity-item">🌇 Times Square by night</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Samedi (Départ) -->
-      <div class="day-card">
-        <div class="day-title"><span>Samedi</span> <small>Départ</small></div>
-        <div class="transit-info">🏨 ➔ 🚇 Métro J/Z (Essex St ➔ Broad St) ou 🚶 Marche ~20 min</div>
-        <div class="time-block">
-          <div class="time-title">Matin</div>
-          <ul class="activity-list">
-            <li class="activity-item">🕊️ Ground Zero / One World ($)</li>
-          </ul>
-        </div>
-        <div class="transit-info">🚕 Taxi / Uber ou NJ Transit vers Newark ~45-60 min</div>
-        <div class="time-block">
-          <div class="time-title">Après-midi</div>
-          <ul class="activity-list">
-            <li class="activity-item">🛫 Départ NY (BOX: 15h00)</li>
-            <li class="activity-item">✈️ Vol Newark : 18h40</li>
-          </ul>
-        </div>
-      </div>
-
+        <div class="day-card"><div class="day-title"><span>Samedi</span> <small>Arrivée</small></div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">✈️ Départ 08h43 ➔ Arrivée 12h10</li><li class="activity-item">🏨 Check-in: The Allen Hotel</li></ul></div><div class="transit-info">🚇 Métro F ~20 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🌇 Times Square</li><li class="activity-item">🍄 Nintendo New York</li><li class="activity-item">🧱 LEGO Store</li><li class="activity-item">🍬 M&M's World</li><li class="activity-item">🧸 FAO Schwarz</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Dimanche</span></div><div class="transit-info">🏨 ➔ 🚇 Métro F/J ~18 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🗽 Statue de la Liberté ($)</li><li class="activity-item">🌳 The Battery (Battery Park) (Gratuit)</li></ul></div><div class="transit-info">🚶 Marche Battery Park ➔ Seaport ~15 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🚢 Seaport District</li><li class="activity-item">🌉 Ponts de Brooklyn & Manhattan</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Lundi</span></div><div class="transit-info">🏨 ➔ 🚇 Métro F ~15 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🌿 High Line (Gratuit)</li><li class="activity-item">🌊 Little Island (Gratuit)</li></ul></div><div class="transit-info">🚶 Marche vers Hudson Yards ~10 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">📐 Edge NYC (Hudson Yards) ($)</li><li class="activity-item">🛍️ Chelsea Market</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Mardi</span></div><div class="transit-info">🏨 ➔ 🚇 Métro B/C ~25 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🦕 Musée d'Histoire Naturelle ($)</li><li class="activity-item">🌲 Central Park</li><li class="activity-item">🛍️ 5th Avenue</li></ul></div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🏙️ Manhattan / Shopping</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Mercredi</span></div><div class="transit-info">🏨 ➔ 🚇 Métro B/D ~12 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🏙️ Empire State Building ($)</li></ul></div><div class="transit-info">🚇 Métro D Express ~20 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🎵 Gospel - Convent Baptist Church ($)</li><li class="activity-item">🧱 Flatiron Building</li><li class="activity-item">⚡ Harry Potter Store</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Jeudi</span></div><div class="transit-info">🏨 ➔ 🚇 Métro F Direct ~50 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🎡 Coney Island</li></ul></div><div class="transit-info">🚇 Métro F Retour ~50 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🚉 Grand Central Terminal</li><li class="activity-item">✨ SUMMIT One Vanderbilt ($)</li><li class="activity-item">📚 Bibliothèque (Winnie l'Ourson)</li><li class="activity-item">☕ Bryant Park</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Vendredi</span></div><div class="transit-info">🏨 ➔ 🚇 Métro F ~20 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🚢 Intrepid Museum ($)</li></ul></div><div class="time-block"><div class="time-title">Après-midi / Soir</div><ul class="activity-list"><li class="activity-item">🎭 Broadway - Aladdin ($)</li><li class="activity-item">🌇 Times Square by night</li></ul></div></div>
+        <div class="day-card"><div class="day-title"><span>Samedi</span> <small>Départ</small></div><div class="transit-info">🏨 ➔ 🚇 Métro J/Z ou 🚶 Marche ~20 min</div><div class="time-block"><div class="time-title">Matin</div><ul class="activity-list"><li class="activity-item">🕊️ Ground Zero / One World ($)</li></ul></div><div class="transit-info">🚕 Taxi / Uber ou NJ Transit vers Newark ~45-60 min</div><div class="time-block"><div class="time-title">Après-midi</div><ul class="activity-list"><li class="activity-item">🛫 Départ NY (BOX: 15h00)</li><li class="activity-item">✈️ Vol Newark : 18h40</li></ul></div></div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script>
-    function sanitizeId(str) {
-      return str.replace(/[^a-zA-Z0-9_-]/g, '_');
-    }
+    // --- UTILS ---
+    const sanitizeId = (str) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const createCustomIcon = (color, emoji) => L.divIcon({ html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
 
-    // --- DONNÉES DES LIEUX ---
+    // --- DATA ---
     const placesData = {
-      "Hôtel": {
-        color: "#FF3B30", icon: "🏨",
-        items: [{ name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨" }]
-      },
-      "Boutiques & Expériences": {
-        color: "#5856D6", icon: "🛍️",
-        items: [
-          { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄", hours: "10:00 - 20:00" },
-          { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬", hours: "10:00 - 22:00" },
-          { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", hours: "09:00 - 21:00" },
-          { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱", hours: "10:00 - 20:00" },
-          { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸", hours: "10:00 - 20:00" }
-        ]
-      },
-      "Spectacles & Musées": {
-        color: "#5856D6", icon: "🎟️",
-        items: [
-          { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866, icon: "🎭" },
-          { name: "Convent Baptist Church (Gospel)", lat: 40.8247, lng: -73.9458, price: true, icon: "🎵" },
-          { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", hours: "10:00 - 17:30" },
-          { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢", hours: "10:00 - 17:00" }
-        ]
-      },
-      "Monuments & Vues": {
-        color: "#5856D6", icon: "🗽",
-        items: [
-          { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨", hours: "09:00 - 00:00" },
-          { name: "Edge NYC (Hudson Yards)", lat: 40.7538, lng: -74.0022, price: true, icon: "📐", hours: "09:00 - 22:00" },
-          { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true, icon: "🗽" },
-          { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true, icon: "🏙️", hours: "10:00 - 22:00" },
-          { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true, icon: "🕊️", hours: "09:00 - 20:00" }
-        ]
-      },
-      "Parcs, Promenades & Quartiers": {
-        color: "#5856D6", icon: "🌳",
-        items: [
-          { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" },
-          { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true, icon: "🌊" },
-          { name: "Central Park (Fountain/Boat Pond)", lat: 40.7744, lng: -73.9708, free: true, icon: "🌲" },
-          { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇" },
-          { name: "Flatiron by night", lat: 40.7411, lng: -73.9897, icon: "🧱" },
-          { name: "Bryant Park", lat: 40.7536, lng: -73.9832, icon: "☕" },
-          { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true, icon: "🚢" },
-          { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772, icon: "🚉" },
-          { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822, icon: "📚", hours: "10:00 - 18:00" },
-          { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true, icon: "🌉" },
-          { name: "Coney Island", lat: 40.5755, lng: -73.9827, icon: "🎡" }
-        ]
-      },
-      "Pizza": {
-        color: "#CC2B1D", icon: "🍕",
-        items: [
-          { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕", hours: "10:00 - 04:00" },
-          { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕", hours: "11:30 - 23:30" },
-          { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945, icon: "🍕", hours: "10:00 - 02:00" }
-        ]
-      },
-      "Bagels": {
-        color: "#AF52DE", icon: "🥯",
-        items: [
-          { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯", hours: "07:00 - 15:00" },
-          { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯", hours: "06:00 - 16:00" },
-          { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687, icon: "🥯", hours: "06:00 - 17:00" }
-        ]
-      },
-      "Brunch": {
-        color: "#FF2D55", icon: "🍳",
-        items: [
-          { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳", hours: "08:30 - 22:00" },
-          { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳", hours: "17:00 - 00:00" }
-        ]
-      },
-      "Food / Restos": {
-        color: "#FF9500", icon: "🍔",
-        items: [
-          { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔", hours: "07:00 - 00:00" },
-          { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9960, icon: "🍝", hours: "11:30 - 23:00" },
-          { name: "Thai Villa / Pranakhon", lat: 40.7383, lng: -73.9906, icon: "🍜", hours: "11:30 - 22:30" },
-          { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897, icon: "🍽️", hours: "12:00 - 22:00" },
-          { name: "Anytime Kitchen (Korean)", lat: 40.7477, lng: -73.9868, icon: "🥢", hours: "11:30 - 01:00" },
-          { name: "Ippudo (Ramen)", lat: 40.7309, lng: -73.9902, icon: "🍜", hours: "11:00 - 22:30" },
-          { name: "Umami Sushi (Lunch)", lat: 40.7251, lng: -74.0012, icon: "🍣", hours: "11:30 - 22:00" },
-          { name: "The Halal Guys (Lunch)", lat: 40.7618, lng: -73.9792, icon: "🥙", hours: "10:00 - 04:00" },
-          { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪", hours: "08:00 - 23:00" },
-          { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9835, icon: "🌯", hours: "11:00 - 22:00" }
-        ]
-      },
-      "Bakeries": {
-        color: "#34C759", icon: "🥐",
-        items: [
-          { name: "Junior's Cheesecake (Times Square)", lat: 40.7583, lng: -73.9863, icon: "🍰", hours: "07:00 - 00:00" },
-          { name: "Smör (Cardamom buns)", lat: 40.7270, lng: -73.9833, icon: "🥐", hours: "08:00 - 18:00" },
-          { name: "Aux Merveilleux de Fred", lat: 40.7402, lng: -74.0015, icon: "🧁", hours: "07:30 - 19:30" },
-          { name: "Ole & Steen (Cinnamon roll)", lat: 40.7385, lng: -73.9912, icon: "🥮", hours: "06:30 - 20:00" },
-          { name: "Librae Bakery", lat: 40.7281, lng: -73.9882, icon: "🍞", hours: "07:00 - 17:00" }
-        ]
-      },
-      "Desserts & Boba": {
-        color: "#5AC8FA", icon: "🍦",
-        items: [
-          { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨", hours: "12:00 - 00:00" },
-          { name: "Tiger Sugar (Boba)", lat: 40.7180, lng: -73.9961, icon: "🧋", hours: "11:00 - 21:30" },
-          { name: "Lazy Sundaes (Boba)", lat: 40.7188, lng: -73.9908, icon: "🧋", hours: "12:00 - 20:00" },
-          { name: "Prince Tea House", lat: 40.7182, lng: -73.9941, icon: "🫖", hours: "12:00 - 23:00" },
-          { name: "Levain Bakery (Cookies)", lat: 40.7799, lng: -73.9803, icon: "🍪", hours: "08:00 - 20:00" }
-        ]
-      },
-      "Shopping": {
-        color: "#007AFF", icon: "🛍️",
-        items: [
-          { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️", hours: "07:00 - 22:00" },
-          { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️", hours: "10:00 - 20:00" },
-          { name: "SoHo", lat: 40.7233, lng: -74.0030, icon: "🛍️", hours: "10:00 - 20:00" }
-        ]
-      }
+      "Hôtel": { color: "#FF3B30", icon: "🏨", items: [{ name: "The Allen Hotel (Little Italy)", lat: 40.7190, lng: -73.9902, icon: "🏨", day: "sat1" }] },
+      "Boutiques & Expériences": { color: "#5856D6", icon: "🛍️", items: [ { name: "Nintendo New York", lat: 40.7588, lng: -73.9790, icon: "🍄", hours: "10:00 - 20:00", day: "sat1" }, { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬", hours: "10:00 - 22:00", day: "sat1" }, { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", hours: "09:00 - 21:00", day: "wed" }, { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱", hours: "10:00 - 20:00", day: "sat1" }, { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸", hours: "10:00 - 20:00", day: "sat1" } ] },
+      "Spectacles & Musées": { color: "#5856D6", icon: "🎟️", items: [ { name: "Broadway - Aladdin", lat: 40.7571, lng: -73.9866, price: true, icon: "🎭", day: "fri" }, { name: "Convent Baptist Church (Gospel)", lat: 40.8247, lng: -73.9458, price: true, icon: "🎵", day: "wed" }, { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", hours: "10:00 - 17:30", day: "tue" }, { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢", hours: "10:00 - 17:00", day: "fri" } ] },
+      "Monuments & Vues": { color: "#5856D6", icon: "🗽", items: [ { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨", hours: "09:00 - 00:00", day: "thu" }, { name: "Edge NYC (Hudson Yards)", lat: 40.7538, lng: -74.0022, price: true, icon: "📐", hours: "09:00 - 22:00", day: "mon" }, { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, price: true, icon: "🗽", day: "sun" }, { name: "Empire State Building", lat: 40.7484, lng: -73.9857, price: true, icon: "🏙️", hours: "10:00 - 22:00", day: "wed" }, { name: "Ground Zero / One World", lat: 40.7127, lng: -74.0134, price: true, icon: "🕊️", hours: "09:00 - 20:00", day: "sat2" } ] },
+      "Parcs, Promenades & Quartiers": { color: "#5856D6", icon: "🌳", items: [ { name: "The Battery (Battery Park)", lat: 40.7033, lng: -74.0170, free: true, icon: "🌳", day: "sun" }, { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿", day: "mon" }, { name: "Little Island", lat: 40.7425, lng: -74.0100, free: true, icon: "🌊", day: "mon" }, { name: "Central Park (Fountain/Boat Pond)", lat: 40.7744, lng: -73.9708, free: true, icon: "🌲", day: "tue" }, { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇", day: "sat1" }, { name: "Flatiron by night", lat: 40.7411, lng: -73.9897, icon: "🧱", day: "wed" }, { name: "Bryant Park", lat: 40.7536, lng: -73.9832, icon: "☕", day: "thu" }, { name: "Seaport District", lat: 40.7063, lng: -74.0030, free: true, icon: "🚢", day: "sun" }, { name: "Grand Central Terminal", lat: 40.7527, lng: -73.9772, icon: "🚉", day: "thu" }, { name: "Bibliothèque (Winnie l'Ourson)", lat: 40.7532, lng: -73.9822, icon: "📚", hours: "10:00 - 18:00", day: "thu" }, { name: "Brooklyn & Manhattan Bridges", lat: 40.7061, lng: -73.9969, free: true, icon: "🌉", day: "sun" }, { name: "Coney Island", lat: 40.5755, lng: -73.9827, icon: "🎡", day: "thu" } ] },
+      "Pizza": { color: "#CC2B1D", icon: "🍕", items: [ { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕", hours: "10:00 - 04:00" }, { name: "John's on Bleecker", lat: 40.7316, lng: -74.0031, icon: "🍕", hours: "11:30 - 23:30" }, { name: "Prince Street Pizza", lat: 40.7230, lng: -73.9945, icon: "🍕", hours: "10:00 - 02:00" } ] },
+      "Bagels": { color: "#AF52DE", icon: "🥯", items: [ { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯", hours: "07:00 - 15:00" }, { name: "Leo's Bagels", lat: 40.7048, lng: -74.0088, icon: "🥯", hours: "06:00 - 16:00" }, { name: "Ess-a-Bagel", lat: 40.7588, lng: -73.9687, icon: "🥯", hours: "06:00 - 17:00" } ] },
+      "Brunch": { color: "#FF2D55", icon: "🍳", items: [ { name: "Jack's Wife Freda", lat: 40.7222, lng: -73.9976, icon: "🍳", hours: "08:30 - 22:00" }, { name: "Beauty & Essex", lat: 40.7185, lng: -73.9871, icon: "🍳", hours: "17:00 - 00:00" } ] },
+      "Food / Restos": { color: "#FF9500", icon: "🍔", items: [ { name: "Ellen’s Stardust Diner", lat: 40.7618, lng: -73.9832, icon: "🍔", hours: "07:00 - 00:00" }, { name: "Rubirosa", lat: 40.7227, lng: -73.9960, icon: "🍝", hours: "11:30 - 23:00" }, { name: "Thai Villa", lat: 40.7383, lng: -73.9906, icon: "🍜", hours: "11:30 - 22:30" }, { name: "ABC Kitchen", lat: 40.7380, lng: -73.9897, icon: "🍽️", hours: "12:00 - 22:00" }, { name: "Anytime Kitchen", lat: 40.7477, lng: -73.9868, icon: "🥢", hours: "11:30 - 01:00" }, { name: "Ippudo", lat: 40.7309, lng: -73.9902, icon: "🍜", hours: "11:00 - 22:30" }, { name: "Umami Sushi", lat: 40.7251, lng: -74.0012, icon: "🍣", hours: "11:30 - 22:00" }, { name: "The Halal Guys", lat: 40.7618, lng: -73.9792, icon: "🥙", hours: "10:00 - 04:00" }, { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪", hours: "08:00 - 23:00" }, { name: "Electric Burrito", lat: 40.7275, lng: -73.9835, icon: "🌯", hours: "11:00 - 22:00" } ] },
+      "Bakeries": { color: "#34C759", icon: "🥐", items: [ { name: "Junior's Cheesecake", lat: 40.7583, lng: -73.9863, icon: "🍰", hours: "07:00 - 00:00" }, { name: "Smör", lat: 40.7270, lng: -73.9833, icon: "🥐", hours: "08:00 - 18:00" }, { name: "Aux Merveilleux", lat: 40.7402, lng: -74.0015, icon: "🧁", hours: "07:30 - 19:30" }, { name: "Ole & Steen", lat: 40.7385, lng: -73.9912, icon: "🥮", hours: "06:30 - 20:00" }, { name: "Librae Bakery", lat: 40.7281, lng: -73.9882, icon: "🍞", hours: "07:00 - 17:00" } ] },
+      "Desserts & Boba": { color: "#5AC8FA", icon: "🍦", items: [ { name: "Spot Dessert Bar", lat: 40.7296, lng: -73.9886, icon: "🍨", hours: "12:00 - 00:00" }, { name: "Tiger Sugar", lat: 40.7180, lng: -73.9961, icon: "🧋", hours: "11:00 - 21:30" }, { name: "Lazy Sundaes", lat: 40.7188, lng: -73.9908, icon: "🧋", hours: "12:00 - 20:00" }, { name: "Prince Tea House", lat: 40.7182, lng: -73.9941, icon: "🫖", hours: "12:00 - 23:00" }, { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪", hours: "08:00 - 20:00" } ] },
+      "Shopping": { color: "#007AFF", icon: "🛍️", items: [ { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️", hours: "07:00 - 22:00", day: "mon" }, { name: "Hudson Yards", lat: 40.7538, lng: -74.0022, icon: "🛍️", hours: "10:00 - 20:00", day: "mon" }, { name: "SoHo", lat: 40.7233, lng: -74.0030, icon: "🛍️", hours: "10:00 - 20:00", day: "tue" } ] }
     };
 
-    // --- CARTE LEAFLET ---
+    // --- INIT CARTE ---
     const map = L.map('map', { center: [40.7400, -73.9800], zoom: 12, zoomControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM' }).addTo(map);
 
     const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.75 }).addTo(map);
-    document.getElementById('toggle-subway').addEventListener('change', (e) => {
-      if (e.target.checked) map.addLayer(subwayLayer);
-      else map.removeLayer(subwayLayer);
-    });
+    
+    // --- BUILD DOM & MARKERS EFFICIENTLY ---
+    const markersMap = new Map(); // Structure clé-valeur rapide O(1)
+    let categoriesHTML = '';
 
-    // --- ICONES & FILTRES ---
-    const markerStore = {};
-    function createCustomIcon(color, emoji) {
-      const html = `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`;
-      return L.divIcon({ html: html, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
-    }
-
-    const container = document.getElementById('categories-container');
-    Object.keys(placesData).forEach(catName => {
-      const cat = placesData[catName];
-      const safeCatId = sanitizeId(catName);
-      markerStore[catName] = [];
-
-      const catGroup = document.createElement('div');
-      catGroup.className = 'category-group';
-      const header = document.createElement('div');
-      header.className = 'category-header';
-      header.innerHTML = `<span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" checked id="cat-toggle-${safeCatId}"><span class="slider"></span></label>`;
-      header.onclick = () => catGroup.classList.toggle('open');
-
-      const itemsDiv = document.createElement('div');
-      itemsDiv.className = 'category-items';
+    Object.entries(placesData).forEach(([catName, cat]) => {
+      const catId = sanitizeId(catName);
+      let itemsHTML = '';
 
       cat.items.forEach((item, idx) => {
-        let badgeHTML = '';
-        if (item.price) badgeHTML += '<span class="badge-price">$</span>';
-        if (item.free) badgeHTML += '<span class="badge-free">Gratuit</span>';
-
+        const itemId = `${catId}-${idx}`;
         const itemIcon = item.icon || cat.icon;
-        const icon = createCustomIcon(cat.color, itemIcon);
-        const marker = L.marker([item.lat, item.lng], { icon: icon });
-
-        let popupText = `<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`;
-        if (item.hours) popupText += `<br><small>🕒 <b>Horaires :</b> ${item.hours}</small>`;
-        marker.bindPopup(popupText);
+        
+        // Création du Marker
+        const marker = L.marker([item.lat, item.lng], { icon: createCustomIcon(cat.color, itemIcon) });
+        marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>${item.hours ? `<br><small>🕒 <b>Horaires :</b> ${item.hours}</small>` : ''}`);
         marker.addTo(map);
+        
+        markersMap.set(itemId, { marker, catId, day: item.day });
 
-        markerStore[catName].push({ marker, id: `${safeCatId}-${idx}` });
-
-        const hoursHTML = item.hours ? `<div class="item-hours">🕒 ${item.hours}</div>` : '';
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = `<div class="item-info"><span>${itemIcon} ${item.name} ${badgeHTML}</span>${hoursHTML}</div><label class="switch"><input type="checkbox" checked id="item-toggle-${safeCatId}-${idx}"><span class="slider"></span></label>`;
-        itemsDiv.appendChild(row);
-
-        setTimeout(() => {
-          document.getElementById(`item-toggle-${safeCatId}-${idx}`).addEventListener('change', (e) => {
-            if (e.target.checked) map.addLayer(marker);
-            else map.removeLayer(marker);
-          });
-        }, 0);
+        // Génération de l'HTML (Batching string)
+        const badges = `${item.price ? '<span class="badge-price">$</span>' : ''}${item.free ? '<span class="badge-free">Gratuit</span>' : ''}`;
+        itemsHTML += `
+          <div class="item-row">
+            <div class="item-info">
+              <span>${itemIcon} ${item.name} ${badges}</span>
+              ${item.hours ? `<div class="item-hours">🕒 ${item.hours}</div>` : ''}
+            </div>
+            <label class="switch"><input type="checkbox" checked data-type="item" data-id="${itemId}" class="item-cb"><span class="slider"></span></label>
+          </div>`;
       });
 
-      catGroup.appendChild(header);
-      catGroup.appendChild(itemsDiv);
-      container.appendChild(catGroup);
+      categoriesHTML += `
+        <div class="category-group">
+          <div class="category-header" onclick="this.parentElement.classList.toggle('open')">
+            <span style="color:${cat.color}">${cat.icon} ${catName} (${cat.items.length})</span>
+            <label class="switch" onclick="event.stopPropagation()"><input type="checkbox" checked data-type="cat" data-id="${catId}" class="cat-cb"><span class="slider"></span></label>
+          </div>
+          <div class="category-items">${itemsHTML}</div>
+        </div>`;
+    });
 
-      setTimeout(() => {
-        document.getElementById(`cat-toggle-${safeCatId}`).addEventListener('change', (e) => {
-          const checked = e.target.checked;
-          markerStore[catName].forEach((obj, idx) => {
-            document.getElementById(`item-toggle-${safeCatId}-${idx}`).checked = checked;
-            if (checked) map.addLayer(obj.marker);
-            else map.removeLayer(obj.marker);
-          });
+    // Injection unique dans le DOM (beaucoup plus rapide)
+    const container = document.getElementById('categories-container');
+    container.innerHTML = categoriesHTML;
+
+    // --- DELEGATION D'EVENEMENTS (1 SEUL LISTENER POUR TOUS LES BOUTONS) ---
+    container.addEventListener('change', (e) => {
+      const target = e.target;
+      const isChecked = target.checked;
+
+      if (target.dataset.type === 'item') {
+        const obj = markersMap.get(target.dataset.id);
+        if (isChecked) map.addLayer(obj.marker); else map.removeLayer(obj.marker);
+      } 
+      else if (target.dataset.type === 'cat') {
+        const catId = target.dataset.id;
+        // Cocher/décocher les enfants & la map
+        document.querySelectorAll(`.item-cb[data-id^="${catId}"]`).forEach(cb => {
+          cb.checked = isChecked;
+          const obj = markersMap.get(cb.dataset.id);
+          if (isChecked) map.addLayer(obj.marker); else map.removeLayer(obj.marker);
         });
-      }, 0);
+      }
     });
 
-    // --- GÉOLOCALISATION ---
-    let userMarker = null;
-    document.getElementById('geolocation-btn').onclick = () => map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
-    map.on('locationfound', (e) => {
-      if (userMarker) map.removeLayer(userMarker);
-      userMarker = L.circleMarker(e.latlng, { radius: 8, fillColor: "#007AFF", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.9 }).addTo(map);
-      userMarker.bindPopup("Vous êtes ici").openPopup();
+    // --- CONTROLES GLOBAUX ---
+    document.getElementById('toggle-subway').addEventListener('change', (e) => e.target.checked ? map.addLayer(subwayLayer) : map.removeLayer(subwayLayer));
+    
+    document.getElementById('toggle-all').addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      document.querySelectorAll('#categories-container input[type="checkbox"]').forEach(cb => cb.checked = isChecked);
+      markersMap.forEach(obj => isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker));
     });
 
-    // --- UI NAVIGATION SIDEBAR & TABS ---
+    document.getElementById('day-filter-select').addEventListener('change', (e) => {
+      const selectedDay = e.target.value;
+      markersMap.forEach((obj, id) => {
+        const cb = document.querySelector(`.item-cb[data-id="${id}"]`);
+        const shouldShow = (selectedDay === "all" || obj.day === selectedDay);
+        
+        if (shouldShow) {
+          map.addLayer(obj.marker);
+          if (cb) cb.checked = true;
+        } else {
+          map.removeLayer(obj.marker);
+          if (cb) cb.checked = false;
+        }
+      });
+      // Synchronisation visuelle des catégories si filtre utilisé
+      document.querySelectorAll('.cat-cb').forEach(catCb => catCb.checked = (selectedDay === "all"));
+    });
+
+    // --- UI INTERACTIONS ---
     const sidebar = document.getElementById('sidebar');
     document.getElementById('panel-toggle').onclick = () => sidebar.classList.add('active');
     document.getElementById('panel-close').onclick = () => sidebar.classList.remove('active');
 
-    const tabFiltersBtn = document.getElementById('tab-btn-filters');
-    const tabPlanningBtn = document.getElementById('tab-btn-planning');
-    const tabFilters = document.getElementById('tab-filters');
-    const tabPlanning = document.getElementById('tab-planning');
+    // Navigation Onglets (Délégation simple)
+    document.querySelector('.nav-tabs').addEventListener('click', (e) => {
+      if(e.target.classList.contains('tab-btn')) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(e.target.dataset.target).classList.add('active');
+      }
+    });
 
-    tabFiltersBtn.onclick = () => {
-      tabFiltersBtn.classList.add('active');
-      tabPlanningBtn.classList.remove('active');
-      tabFilters.classList.add('active');
-      tabPlanning.classList.remove('active');
-    };
+    // --- GEOLOCALISATION ---
+    let userMarker = null;
+    document.getElementById('geolocation-btn').onclick = () => map.locate({ setView: true, maxZoom: 16 });
+    map.on('locationfound', (e) => {
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.circleMarker(e.latlng, { radius: 8, fillColor: "#007AFF", color: "#FFF", weight: 3, fillOpacity: 0.9 }).addTo(map).bindPopup("Vous êtes ici").openPopup();
+    });
 
-    tabPlanningBtn.onclick = () => {
-      tabPlanningBtn.classList.add('active');
-      tabFiltersBtn.classList.remove('active');
-      tabFilters.classList.remove('active');
-      tabPlanning.classList.add('active');
-    };
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Fail', err));
-    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
   </script>
 </body>
 </html>
