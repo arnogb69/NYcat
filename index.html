@@ -49,7 +49,6 @@
     .category-group.open .category-items { display: block; }
     .item-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #d1d1d6; }
     .item-info { display: flex; flex-direction: column; }
-    .item-hours { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
     /* Toggle Switch */
     .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
@@ -66,16 +65,15 @@
     .day-card { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
     .day-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; }
     .time-block { margin-top: 8px; }
-    .time-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
     .activity-list { list-style: none; padding-left: 0; }
-    .activity-item { font-size: 13px; padding: 4px 0; color: #e5e5ea; display: flex; align-items: center; gap: 6px; }
+    .activity-item { font-size: 14px; padding: 6px 0; color: #e5e5ea; display: flex; align-items: center; gap: 8px; }
   </style>
 </head>
 <body>
 
   <div id="map"></div>
 
-  <!-- New Global Burger Menu Button -->
+  <!-- Global Burger Menu Button -->
   <button id="burger-btn" class="overlay-control">☰ Menu</button>
   <button id="geolocation-btn" title="Ma Position">🎯</button>
 
@@ -87,29 +85,66 @@
 
     <!-- Vertical Navigation Menu -->
     <div class="nav-tabs">
-      <button class="tab-btn active" data-target="tab-jours">📅 Jours de la Semaine</button>
+      <button class="tab-btn active" data-target="tab-planning">🗓️ Mon Planning</button>
       <button class="tab-btn" data-target="tab-filters">📍 Lieux Actifs (Carte)</button>
-      <button class="tab-btn" data-target="tab-planning">🗓️ Mon Planning</button>
       <button class="tab-btn" data-target="tab-archives">🗄️ Archives</button>
     </div>
 
-    <!-- TAB 1: JOURS DE LA SEMAINE -->
-    <div class="tab-content active" id="tab-jours">
+    <!-- TAB 1: PLANNING -->
+    <div class="tab-content active" id="tab-planning">
       <div class="day-select-container">
-        <label for="day-filter-select" style="font-weight: 600; font-size: 14px;">Filtrer la carte par jour :</label>
-        <select id="day-filter-select">
-          <option value="all">🌍 Tous les jours (Afficher tout)</option>
-          <option value="sat1">Samedi (Arrivée)</option>
-          <option value="sun">Dimanche</option>
-          <option value="mon">Lundi</option>
-          <option value="tue">Mardi</option>
+        <label for="planning-day-select" style="font-weight: 600; font-size: 14px;">Afficher la journée :</label>
+        <select id="planning-day-select">
+          <option value="all">🌍 Afficher toute la semaine</option>
           <option value="wed">Mercredi</option>
           <option value="thu">Jeudi</option>
           <option value="fri">Vendredi</option>
-          <option value="sat2">Samedi (Départ)</option>
+          <option value="sat">Samedi</option>
         </select>
       </div>
-      <p style="font-size: 13px; color: var(--text-muted);">Sélectionnez un jour pour masquer les lieux qui ne sont pas prévus à cette date.</p>
+
+      <div class="day-card" data-day="wed">
+        <div class="day-title"><span>Mercredi</span></div>
+        <div class="time-block">
+          <ul class="activity-list">
+            <li class="activity-item">⚡ Harry Potter Store</li>
+            <li class="activity-item">👟 ON Shoes</li>
+            <li class="activity-item">✨ SUMMIT One Vanderbilt ($)</li>
+            <li class="activity-item">⛲ Central Park (Big Fountain)</li>
+            <li class="activity-item">🎵 Gospel Harlem Hallelujah</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day-card" data-day="thu">
+        <div class="day-title"><span>Jeudi</span></div>
+        <div class="time-block">
+          <ul class="activity-list">
+            <li class="activity-item">🎨 NYC Artechouse ($)</li>
+            <li class="activity-item">🌿 High Line</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day-card" data-day="fri">
+        <div class="day-title"><span>Vendredi</span></div>
+        <div class="time-block">
+          <ul class="activity-list">
+            <li class="activity-item">🦕 Musée d'Histoire Naturelle ($)</li>
+            <li class="activity-item">🧞 Aladdin the musical ($)</li>
+            <li class="activity-item">🍄 Nintendo Store</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day-card" data-day="sat">
+        <div class="day-title"><span>Samedi</span></div>
+        <div class="time-block">
+          <ul class="activity-list">
+            <li class="activity-item">🚢 Intrepid Museum ($)</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <!-- TAB 2: LIEUX ACTIFS (Filtres) -->
@@ -125,17 +160,7 @@
       <div id="active-categories-container"></div>
     </div>
 
-    <!-- TAB 3: PLANNING (Conservé à l'identique) -->
-    <div class="tab-content" id="tab-planning">
-      <div class="day-card"><div class="day-title"><span>Samedi</span> <small>Arrivée</small></div><div class="time-block"><ul class="activity-list"><li class="activity-item">✈️ Arrivée 12h10</li><li class="activity-item">🏨 Check-in The Allen Hotel</li><li class="activity-item">🌇 Times Square</li><li class="activity-item">🍄 Nintendo Store</li></ul></div></div>
-      <div class="day-card"><div class="day-title"><span>Mardi</span></div><div class="time-block"><ul class="activity-list"><li class="activity-item">🦕 Musée d'Histoire Naturelle ($)</li><li class="activity-item">🌲 Central Park (Big Fountain)</li></ul></div></div>
-      <div class="day-card"><div class="day-title"><span>Mercredi</span></div><div class="time-block"><ul class="activity-list"><li class="activity-item">⚡ Harry Potter Store</li><li class="activity-item">🎵 Gospel Harlem Hallelujah</li></ul></div></div>
-      <div class="day-card"><div class="day-title"><span>Jeudi</span></div><div class="time-block"><ul class="activity-list"><li class="activity-item">✨ SUMMIT One Vanderbilt ($)</li></ul></div></div>
-      <div class="day-card"><div class="day-title"><span>Vendredi</span></div><div class="time-block"><ul class="activity-list"><li class="activity-item">🚢 Intrepid Museum ($)</li><li class="activity-item">🎭 Aladdin the musical</li></ul></div></div>
-      <p style="font-size:12px; color:var(--text-muted); text-align:center;">(Planning abrégé pour l'exemple)</p>
-    </div>
-
-    <!-- TAB 4: ARCHIVES -->
+    <!-- TAB 3: ARCHIVES -->
     <div class="tab-content" id="tab-archives">
       <div class="master-control">
         <span>Afficher les archives sur la carte</span>
@@ -151,34 +176,36 @@
     const sanitizeId = (str) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
     const createCustomIcon = (color, emoji) => L.divIcon({ html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
 
-    // --- DONNÉES ACTIVES (Image fournie) ---
+    // --- DONNÉES ACTIVES ---
     const activePlaces = {
+      "🏨 Mon Hébergement": { color: "#FF3B30", icon: "🏨", items: [
+        { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨" }
+      ]},
       "Musées & Expériences": { color: "#5856D6", icon: "🎟️", items: [
-        { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", day: "tue" },
-        { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢", day: "fri" },
-        { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨", day: "thu" },
-        { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨", day: "mon" }
+        { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕" },
+        { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢" },
+        { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨" },
+        { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨" }
       ]},
       "Spectacles": { color: "#FF2D55", icon: "🎭", items: [
-        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞", day: "fri" },
-        { name: "Gospel Harlem Hallelujah", lat: 40.8075, lng: -73.9465, price: true, icon: "🎵", day: "wed" }
+        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞" },
+        { name: "Gospel Harlem Hallelujah", lat: 40.8075, lng: -73.9465, price: true, icon: "🎵" }
       ]},
       "Parcs & Lieux": { color: "#34C759", icon: "🌳", items: [
-        { name: "Central Park (Big Fountain)", lat: 40.7744, lng: -73.9708, free: true, icon: "⛲", day: "tue" },
-        { name: "Times Square", lat: 40.7580, lng: -73.9855, free: true, icon: "🌇", day: "sat1" }
+        { name: "Central Park (Big Fountain)", lat: 40.7744, lng: -73.9708, free: true, icon: "⛲" },
+        { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" }
       ]},
       "Boutiques": { color: "#007AFF", icon: "🛍️", items: [
-        { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", day: "wed" },
-        { name: "ON Shoes (SoHo)", lat: 40.7259, lng: -73.9967, icon: "👟", day: "tue" },
-        { name: "Nintendo Store", lat: 40.7588, lng: -73.9790, icon: "🍄", day: "sat1" }
+        { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡" },
+        { name: "ON Shoes (SoHo)", lat: 40.7259, lng: -73.9967, icon: "👟" },
+        { name: "Nintendo Store", lat: 40.7588, lng: -73.9790, icon: "🍄" }
       ]}
     };
 
-    // --- DONNÉES ARCHIVÉES (Ancienne liste complète) ---
+    // --- DONNÉES ARCHIVÉES ---
     const archivedPlaces = {
-      "Hôtel & Divers": { color: "#8e8e93", icon: "🏨", items: [{ name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨" }] },
       "Anciennes Boutiques": { color: "#8e8e93", icon: "🛍️", items: [ { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" }, { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" }, { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸" }, { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️" } ] },
-      "Anciens Monuments": { color: "#8e8e93", icon: "🗽", items: [ { name: "Edge NYC", lat: 40.7538, lng: -74.0022, icon: "📐" }, { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, icon: "🗽" }, { name: "Empire State Building", lat: 40.7484, lng: -73.9857, icon: "🏙️" }, { name: "Ground Zero", lat: 40.7127, lng: -74.0134, icon: "🕊️" } ] },
+      "Anciens Monuments": { color: "#8e8e93", icon: "🗽", items: [ { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇" }, { name: "Edge NYC", lat: 40.7538, lng: -74.0022, icon: "📐" }, { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, icon: "🗽" }, { name: "Empire State Building", lat: 40.7484, lng: -73.9857, icon: "🏙️" }, { name: "Ground Zero", lat: 40.7127, lng: -74.0134, icon: "🕊️" } ] },
       "Food (Pizza, Restos, Bagels)": { color: "#8e8e93", icon: "🍕", items: [ { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } ] }
     };
 
@@ -188,7 +215,7 @@
 
     const markersMap = new Map();
 
-    // Fonction de génération HTML générique
+    // Génération HTML générique
     function buildCategoryHTML(dataObj, containerId, isArchivedByDefault) {
       let html = '';
       Object.entries(dataObj).forEach(([catName, cat]) => {
@@ -202,10 +229,9 @@
           const marker = L.marker([item.lat, item.lng], { icon: createCustomIcon(cat.color, itemIcon) });
           marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`);
           
-          // Ajouter à la carte uniquement si ce n'est pas archivé
           if (!isArchivedByDefault) marker.addTo(map);
           
-          markersMap.set(itemId, { marker, catId, day: item.day, isArchived: isArchivedByDefault });
+          markersMap.set(itemId, { marker, catId, isArchived: isArchivedByDefault });
 
           const badges = `${item.price ? '<span class="badge-price">$</span>' : ''}${item.free ? '<span class="badge-free">Gratuit</span>' : ''}`;
           itemsHTML += `
@@ -216,7 +242,7 @@
         });
 
         html += `
-          <div class="category-group">
+          <div class="category-group open">
             <div class="category-header" onclick="this.parentElement.classList.toggle('open')">
               <span style="color:${cat.color}">${cat.icon} ${catName}</span>
               <label class="switch" onclick="event.stopPropagation()"><input type="checkbox" ${!isArchivedByDefault ? 'checked' : ''} data-type="cat" data-id="${catId}" class="cat-cb"><span class="slider"></span></label>
@@ -263,23 +289,16 @@
       markersMap.forEach(obj => { if(obj.isArchived) isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
     });
 
-    // Filtre par Jours (S'applique uniquement aux actifs)
-    document.getElementById('day-filter-select').addEventListener('change', (e) => {
-      const selectedDay = e.target.value;
-      markersMap.forEach((obj, id) => {
-        if(obj.isArchived) return; // Ne pas toucher aux archives
-        const cb = document.querySelector(`.item-cb[data-id="${id}"]`);
-        const shouldShow = (selectedDay === "all" || obj.day === selectedDay);
-        
-        if (shouldShow) {
-          map.addLayer(obj.marker);
-          if (cb) cb.checked = true;
+    // Filtre des jours du planning
+    document.getElementById('planning-day-select').addEventListener('change', (e) => {
+      const selected = e.target.value;
+      document.querySelectorAll('.day-card').forEach(card => {
+        if (selected === 'all' || card.dataset.day === selected) {
+          card.style.display = 'block';
         } else {
-          map.removeLayer(obj.marker);
-          if (cb) cb.checked = false;
+          card.style.display = 'none';
         }
       });
-      document.querySelectorAll('#active-categories-container .cat-cb').forEach(catCb => catCb.checked = (selectedDay === "all"));
     });
 
     // Sidebar UI
