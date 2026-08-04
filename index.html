@@ -49,6 +49,7 @@
     .category-group.open .category-items { display: block; }
     .item-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #d1d1d6; }
     .item-info { display: flex; flex-direction: column; }
+    .item-hours { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
     /* Toggle Switch */
     .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
@@ -63,7 +64,8 @@
 
     /* Planning Day Design */
     .day-card { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
-    .day-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .day-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .day-weather { font-size: 12px; font-weight: normal; color: #a1a1aa; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; }
     .time-block { margin-top: 8px; }
     .activity-list { list-style: none; padding-left: 0; }
     .activity-item { font-size: 14px; padding: 6px 0; color: #e5e5ea; display: flex; align-items: center; gap: 8px; }
@@ -104,7 +106,7 @@
       </div>
 
       <div class="day-card" data-day="wed">
-        <div class="day-title"><span>Mercredi</span></div>
+        <div class="day-title"><span>Mercredi</span> <span class="day-weather">☁️ 0mm / 17-18h</span></div>
         <div class="time-block">
           <ul class="activity-list">
             <li class="activity-item">⚡ Harry Potter Store</li>
@@ -117,7 +119,7 @@
       </div>
 
       <div class="day-card" data-day="thu">
-        <div class="day-title"><span>Jeudi</span></div>
+        <div class="day-title"><span>Jeudi</span> <span class="day-weather">🌧️ 2mm / tte la journée</span></div>
         <div class="time-block">
           <ul class="activity-list">
             <li class="activity-item">🎨 NYC Artechouse ($)</li>
@@ -127,7 +129,7 @@
       </div>
 
       <div class="day-card" data-day="fri">
-        <div class="day-title"><span>Vendredi</span></div>
+        <div class="day-title"><span>Vendredi</span> <span class="day-weather">🌧️ 5mm / après-midi</span></div>
         <div class="time-block">
           <ul class="activity-list">
             <li class="activity-item">🦕 Musée d'Histoire Naturelle ($)</li>
@@ -138,7 +140,7 @@
       </div>
 
       <div class="day-card" data-day="sat">
-        <div class="day-title"><span>Samedi</span></div>
+        <div class="day-title"><span>Samedi</span> <span class="day-weather">☁️ 0mm / 12-18h</span></div>
         <div class="time-block">
           <ul class="activity-list">
             <li class="activity-item">🚢 Intrepid Museum ($)</li>
@@ -176,16 +178,16 @@
     const sanitizeId = (str) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
     const createCustomIcon = (color, emoji) => L.divIcon({ html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
 
-    // --- DONNÉES ACTIVES ---
+    // --- DONNÉES ACTIVES (Avec Horaires) ---
     const activePlaces = {
       "🏨 Mon Hébergement": { color: "#FF3B30", icon: "🏨", items: [
         { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨" }
       ]},
       "Musées & Expériences": { color: "#5856D6", icon: "🎟️", items: [
-        { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕" },
-        { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢" },
-        { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨" },
-        { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨" }
+        { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", hours: "10:00 - 17:30" },
+        { name: "Intrepid Museum", lat: 40.7645, lng: -73.9996, price: true, icon: "🚢", hours: "10:00 - 17:00" },
+        { name: "SUMMIT One Vanderbilt", lat: 40.7528, lng: -73.9785, price: true, icon: "✨", hours: "09:00 - 00:00" },
+        { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨", hours: "10:00 - 22:00" }
       ]},
       "Spectacles": { color: "#FF2D55", icon: "🎭", items: [
         { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞" },
@@ -196,9 +198,9 @@
         { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" }
       ]},
       "Boutiques": { color: "#007AFF", icon: "🛍️", items: [
-        { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡" },
-        { name: "ON Shoes (SoHo)", lat: 40.7259, lng: -73.9967, icon: "👟" },
-        { name: "Nintendo Store", lat: 40.7588, lng: -73.9790, icon: "🍄" }
+        { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", hours: "09:00 - 21:00" },
+        { name: "ON Shoes (SoHo)", lat: 40.7259, lng: -73.9967, icon: "👟", hours: "10:00 - 20:00" },
+        { name: "Nintendo Store", lat: 40.7588, lng: -73.9790, icon: "🍄", hours: "10:00 - 20:00" }
       ]}
     };
 
@@ -234,9 +236,14 @@
           markersMap.set(itemId, { marker, catId, isArchived: isArchivedByDefault });
 
           const badges = `${item.price ? '<span class="badge-price">$</span>' : ''}${item.free ? '<span class="badge-free">Gratuit</span>' : ''}`;
+          const hoursHtml = item.hours ? `<span class="item-hours">🕒 ${item.hours}</span>` : '';
+          
           itemsHTML += `
             <div class="item-row">
-              <div class="item-info"><span>${itemIcon} ${item.name} ${badges}</span></div>
+              <div class="item-info">
+                <span>${itemIcon} ${item.name} ${badges}</span>
+                ${hoursHtml}
+              </div>
               <label class="switch"><input type="checkbox" ${!isArchivedByDefault ? 'checked' : ''} data-type="item" data-id="${itemId}" class="item-cb"><span class="slider"></span></label>
             </div>`;
         });
