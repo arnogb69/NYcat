@@ -69,6 +69,7 @@
     .time-block { margin-top: 8px; }
     .activity-list { list-style: none; padding-left: 0; }
     .activity-item { font-size: 14px; padding: 6px 0; color: #e5e5ea; display: flex; align-items: center; gap: 8px; }
+    .activity-hours { font-size: 12px; color: var(--text-muted); margin-left: auto; }
   </style>
 </head>
 <body>
@@ -109,11 +110,11 @@
         <div class="day-title"><span>Mercredi</span> <span class="day-weather">☁️ 0mm / 17-18h</span></div>
         <div class="time-block">
           <ul class="activity-list">
-            <li class="activity-item">⚡ Harry Potter Store</li>
-            <li class="activity-item">👟 ON Shoes</li>
-            <li class="activity-item">✨ SUMMIT One Vanderbilt ($)</li>
-            <li class="activity-item">⛲ Central Park (Big Fountain)</li>
-            <li class="activity-item">🎵 Gospel Harlem Hallelujah</li>
+            <li class="activity-item">⚡ Harry Potter Store <span class="activity-hours">🕒 09:00-21:00</span></li>
+            <li class="activity-item">👟 ON Shoes <span class="activity-hours">🕒 10:00-20:00</span></li>
+            <li class="activity-item">✨ SUMMIT One Vanderbilt <span class="activity-hours">🕒 09:00-00:00</span></li>
+            <li class="activity-item">⛲ Central Park <span class="activity-hours">🕒 06:00-01:00</span></li>
+            <li class="activity-item">🎵 Gospel Harlem <span class="activity-hours">🕒 ~18:30/19:00</span></li>
           </ul>
         </div>
       </div>
@@ -122,8 +123,9 @@
         <div class="day-title"><span>Jeudi</span> <span class="day-weather">🌧️ 2mm / tte la journée</span></div>
         <div class="time-block">
           <ul class="activity-list">
-            <li class="activity-item">🎨 NYC Artechouse ($)</li>
-            <li class="activity-item">🌿 High Line</li>
+            <li class="activity-item">🎨 NYC Artechouse <span class="activity-hours">🕒 10:00-22:00</span></li>
+            <li class="activity-item">🌿 High Line <span class="activity-hours">🕒 07:00-22:00</span></li>
+            <li class="activity-item">🧞 Aladdin the musical <span class="activity-hours">🕒 ~19:00</span></li>
           </ul>
         </div>
       </div>
@@ -132,9 +134,8 @@
         <div class="day-title"><span>Vendredi</span> <span class="day-weather">🌧️ 5mm / après-midi</span></div>
         <div class="time-block">
           <ul class="activity-list">
-            <li class="activity-item">🦕 Musée d'Histoire Naturelle ($)</li>
-            <li class="activity-item">🧞 Aladdin the musical ($)</li>
-            <li class="activity-item">🍄 Nintendo Store</li>
+            <li class="activity-item">🦕 Musée d'Histoire Naturelle <span class="activity-hours">🕒 10:00-17:30</span></li>
+            <li class="activity-item">🍄 Nintendo Store <span class="activity-hours">🕒 10:00-20:00</span></li>
           </ul>
         </div>
       </div>
@@ -143,7 +144,7 @@
         <div class="day-title"><span>Samedi</span> <span class="day-weather">☁️ 0mm / 12-18h</span></div>
         <div class="time-block">
           <ul class="activity-list">
-            <li class="activity-item">🚢 Intrepid Museum ($)</li>
+            <li class="activity-item">🚢 Intrepid Museum <span class="activity-hours">🕒 10:00-17:00</span></li>
           </ul>
         </div>
       </div>
@@ -181,7 +182,7 @@
     // --- DONNÉES ACTIVES (Avec Horaires) ---
     const activePlaces = {
       "🏨 Mon Hébergement": { color: "#FF3B30", icon: "🏨", items: [
-        { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨" }
+        { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨", hours: "Ouvert 24h/24" }
       ]},
       "Musées & Expériences": { color: "#5856D6", icon: "🎟️", items: [
         { name: "Musée d'Histoire Naturelle", lat: 40.7813, lng: -73.9740, price: true, icon: "🦕", hours: "10:00 - 17:30" },
@@ -190,12 +191,12 @@
         { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨", hours: "10:00 - 22:00" }
       ]},
       "Spectacles": { color: "#FF2D55", icon: "🎭", items: [
-        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞" },
-        { name: "Gospel Harlem Hallelujah", lat: 40.8075, lng: -73.9465, price: true, icon: "🎵" }
+        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞", hours: "~19:00 (selon billet)" },
+        { name: "Gospel Harlem Hallelujah", lat: 40.8075, lng: -73.9465, price: true, icon: "🎵", hours: "~18:30/19:00" }
       ]},
       "Parcs & Lieux": { color: "#34C759", icon: "🌳", items: [
-        { name: "Central Park (Big Fountain)", lat: 40.7744, lng: -73.9708, free: true, icon: "⛲" },
-        { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿" }
+        { name: "Central Park (Big Fountain)", lat: 40.7744, lng: -73.9708, free: true, icon: "⛲", hours: "06:00 - 01:00" },
+        { name: "High Line", lat: 40.7480, lng: -74.0048, free: true, icon: "🌿", hours: "07:00 - 22:00" }
       ]},
       "Boutiques": { color: "#007AFF", icon: "🛍️", items: [
         { name: "Harry Potter Store", lat: 40.7410, lng: -73.9893, icon: "⚡", hours: "09:00 - 21:00" },
@@ -229,7 +230,8 @@
           const itemIcon = item.icon || cat.icon;
           
           const marker = L.marker([item.lat, item.lng], { icon: createCustomIcon(cat.color, itemIcon) });
-          marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>`);
+          const popupHours = item.hours ? `<br>🕒 <b>Horaires:</b> ${item.hours}` : '';
+          marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>${popupHours}`);
           
           if (!isArchivedByDefault) marker.addTo(map);
           
