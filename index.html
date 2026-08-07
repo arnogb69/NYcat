@@ -171,7 +171,7 @@
         <span>Afficher les archives sur la carte</span>
         <label class="switch"><input type="checkbox" id="toggle-all-archive"><span class="slider"></span></label>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux sont masqués par défaut pour alléger la carte.</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux sont masqués par défaut pour alléger la carte. Activez-les pour afficher vos anciennes idées (Brunch, Bagels, etc.).</p>
       <div id="archive-categories-container"></div>
     </div>
   </div>
@@ -211,9 +211,28 @@
 
     // --- DONNÉES ARCHIVÉES ---
     const archivedPlaces = {
-      "Anciennes Boutiques": { color: "#8e8e93", icon: "🛍️", items: [ { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" }, { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" }, { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸" }, { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️" } ] },
-      "Anciens Monuments": { color: "#8e8e93", icon: "🗽", items: [ { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇" }, { name: "Edge NYC", lat: 40.7538, lng: -74.0022, icon: "📐" }, { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, icon: "🗽" }, { name: "Empire State Building", lat: 40.7484, lng: -73.9857, icon: "🏙️" }, { name: "Ground Zero", lat: 40.7127, lng: -74.0134, icon: "🕊️" } ] },
-      "Food (Pizza, Restos, Bagels)": { color: "#8e8e93", icon: "🍕", items: [ { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } ] }
+      "Anciennes Boutiques": { color: "#8e8e93", icon: "🛍️", items: [ 
+        { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" }, 
+        { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" }, 
+        { name: "FAO Schwarz", lat: 40.7636, lng: -73.9729, icon: "🧸" }, 
+        { name: "Chelsea Market", lat: 40.7420, lng: -74.0048, icon: "🛍️" } 
+      ]},
+      "Anciens Monuments": { color: "#8e8e93", icon: "🗽", items: [ 
+        { name: "Times Square", lat: 40.7580, lng: -73.9855, icon: "🌇" }, 
+        { name: "Edge NYC", lat: 40.7538, lng: -74.0022, icon: "📐" }, 
+        { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, icon: "🗽" }, 
+        { name: "Empire State Building", lat: 40.7484, lng: -73.9857, icon: "🏙️" }, 
+        { name: "Ground Zero", lat: 40.7127, lng: -74.0134, icon: "🕊️" } 
+      ]},
+      "Food (Brunch, Bagels, Pizza...)": { color: "#8e8e93", icon: "🍔", items: [ 
+        { name: "Clinton St. Baking (Brunch)", lat: 40.7212, lng: -73.9839, icon: "🥞" },
+        { name: "Sunday in Brooklyn (Brunch)", lat: 40.7142, lng: -73.9630, icon: "🥞" },
+        { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, 
+        { name: "Russ & Daughters", lat: 40.7225, lng: -73.9882, icon: "🥯" },
+        { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, 
+        { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, 
+        { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } 
+      ]}
     };
 
     const map = L.map('map', { center: [40.7500, -73.9800], zoom: 12, zoomControl: false });
