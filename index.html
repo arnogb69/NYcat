@@ -28,7 +28,7 @@
     .sidebar-header h2 { font-size: 18px; font-weight: 700; }
     .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
 
-    /* Vertical Burger Menu Tabs */
+    /* Vertical Navigation Tabs */
     .nav-tabs { display: flex; flex-direction: column; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 8px; gap: 4px; }
     .tab-btn { padding: 12px 16px; background: none; border: none; color: var(--text-muted); font-weight: 600; font-size: 15px; cursor: pointer; text-align: left; border-radius: 8px; display: flex; align-items: center; gap: 10px; }
     .tab-btn.active { color: var(--text); background: rgba(10,132,255,0.2); border-left: 4px solid var(--accent); }
@@ -49,7 +49,7 @@
     .category-group.open .category-items { display: block; }
     .item-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #d1d1d6; }
     .item-info { display: flex; flex-direction: column; }
-    .item-hours { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .item-hours { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
     /* Toggle Switch */
     .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
@@ -66,7 +66,6 @@
     .day-card { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); }
     .day-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .day-weather { font-size: 12px; font-weight: normal; color: #a1a1aa; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; }
-    .time-block { margin-top: 8px; }
     .activity-list { list-style: none; padding-left: 0; }
     .activity-item { font-size: 14px; padding: 6px 0; color: #e5e5ea; display: flex; align-items: center; gap: 8px; }
     .activity-hours { font-size: 12px; color: var(--text-muted); margin-left: auto; }
@@ -76,7 +75,7 @@
 
   <div id="map"></div>
 
-  <!-- Global Burger Menu Button (Renommé Info) -->
+  <!-- Global Header Button -->
   <button id="burger-btn" class="overlay-control">☰ Info</button>
   <button id="geolocation-btn" title="Ma Position">🎯</button>
 
@@ -86,7 +85,7 @@
       <button class="close-btn" id="panel-close">✕</button>
     </div>
 
-    <!-- Vertical Navigation Menu -->
+    <!-- Navigation Menu -->
     <div class="nav-tabs">
       <button class="tab-btn active" data-target="tab-planning">🗓️ Mon Planning</button>
       <button class="tab-btn" data-target="tab-filters">📍 Lieux Actifs</button>
@@ -109,51 +108,43 @@
 
       <div class="day-card" data-day="wed">
         <div class="day-title"><span>Mercredi</span> <span class="day-weather">☁️ 0mm / 17-18h</span></div>
-        <div class="time-block">
-          <ul class="activity-list">
-            <li class="activity-item">🚡 Roosevelt Island Tramway <span class="activity-hours">🕒 06:00-02:00</span></li>
-            <li class="activity-item">✨ SUMMIT One Vanderbilt <span class="activity-hours">🕒 09:00-00:00</span></li>
-            <li class="activity-item">⛲ Central Park <span class="activity-hours">🕒 06:00-01:00</span></li>
-            <li class="activity-item">🎵 Gospel Harlem <span class="activity-hours">🕒 ~18:30/19:00</span></li>
-            <li class="activity-item">🎤 Ellen's Stardust Diner <span class="activity-hours">🕒 07:00-00:00</span></li>
-          </ul>
-        </div>
+        <ul class="activity-list">
+          <li class="activity-item">🚡 Roosevelt Island Tramway <span class="activity-hours">🕒 06:00-02:00</span></li>
+          <li class="activity-item">✨ SUMMIT One Vanderbilt <span class="activity-hours">🕒 09:00-00:00</span></li>
+          <li class="activity-item">⛲ Central Park <span class="activity-hours">🕒 06:00-01:00</span></li>
+          <li class="activity-item">🎵 Gospel Harlem <span class="activity-hours">🕒 ~18:30/19:00</span></li>
+          <li class="activity-item">🎤 Ellen's Stardust Diner <span class="activity-hours">🕒 07:00-00:00</span></li>
+        </ul>
       </div>
 
       <div class="day-card" data-day="thu">
         <div class="day-title"><span>Jeudi</span> <span class="day-weather">🌧️ 2mm / tte la journée</span></div>
-        <div class="time-block">
-          <ul class="activity-list">
-            <li class="activity-item">🎨 NYC Artechouse <span class="activity-hours">🕒 10:00-22:00</span></li>
-            <li class="activity-item">🌿 High Line <span class="activity-hours">🕒 07:00-22:00</span></li>
-            <li class="activity-item">🧞 Aladdin the musical <span class="activity-hours">🕒 ~19:00</span></li>
-            <li class="activity-item">🍄 Nintendo Store <span class="activity-hours">🕒 10:00-20:00</span></li>
-          </ul>
-        </div>
+        <ul class="activity-list">
+          <li class="activity-item">🎨 NYC Artechouse <span class="activity-hours">🕒 10:00-22:00</span></li>
+          <li class="activity-item">🌿 High Line <span class="activity-hours">🕒 07:00-22:00</span></li>
+          <li class="activity-item">🧞 Aladdin the musical <span class="activity-hours">🕒 ~19:00</span></li>
+          <li class="activity-item">🍄 Nintendo Store <span class="activity-hours">🕒 10:00-20:00</span></li>
+        </ul>
       </div>
 
       <div class="day-card" data-day="fri">
         <div class="day-title"><span>Vendredi</span> <span class="day-weather">🌧️ 5mm / après-midi</span></div>
-        <div class="time-block">
-          <ul class="activity-list">
-            <li class="activity-item">🦕 Musée d'Histoire Naturelle <span class="activity-hours">🕒 10:00-17:30</span></li>
-            <li class="activity-item">⚡ Harry Potter Store <span class="activity-hours">🕒 09:00-21:00</span></li>
-            <li class="activity-item">👟 ON Shoes <span class="activity-hours">🕒 10:00-20:00</span></li>
-          </ul>
-        </div>
+        <ul class="activity-list">
+          <li class="activity-item">🦕 Musée d'Histoire Naturelle <span class="activity-hours">🕒 10:00-17:30</span></li>
+          <li class="activity-item">⚡ Harry Potter Store <span class="activity-hours">🕒 09:00-21:00</span></li>
+          <li class="activity-item">👟 ON Shoes <span class="activity-hours">🕒 10:00-20:00</span></li>
+        </ul>
       </div>
 
       <div class="day-card" data-day="sat">
         <div class="day-title"><span>Samedi</span> <span class="day-weather">☁️ 0mm / 12-18h</span></div>
-        <div class="time-block">
-          <ul class="activity-list">
-            <li class="activity-item">🚢 Intrepid Museum <span class="activity-hours">🕒 10:00-17:00</span></li>
-          </ul>
-        </div>
+        <ul class="activity-list">
+          <li class="activity-item">🚢 Intrepid Museum <span class="activity-hours">🕒 10:00-17:00</span></li>
+        </ul>
       </div>
     </div>
 
-    <!-- TAB 2: LIEUX ACTIFS (Filtres) -->
+    <!-- TAB 2: LIEUX ACTIFS -->
     <div class="tab-content" id="tab-filters">
       <div class="subway-control">
         <span>🚇 Calque Métro MTA</span>
@@ -166,23 +157,23 @@
       <div id="active-categories-container"></div>
     </div>
 
-    <!-- TAB 3: POINTS DE REPAS (NOUVEAU) -->
+    <!-- TAB 3: POINTS DE REPAS (NOUVELLES LISTES - DÉCOCHÉES PAR DÉFAUT) -->
     <div class="tab-content" id="tab-food">
       <div class="master-control">
         <span>Afficher les points de repas</span>
         <label class="switch"><input type="checkbox" id="toggle-all-food"><span class="slider"></span></label>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux gourmands sont masqués par défaut pour alléger la carte. Cochez-les pour les faire apparaître au besoin.</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux sont décochés par défaut. Activez-les pour les faire apparaître sur la carte.</p>
       <div id="food-categories-container"></div>
     </div>
 
-    <!-- TAB 4: ARCHIVES -->
+    <!-- TAB 4: ARCHIVES (ANCIENS LIEUX + ANCIENNE LISTE DE NOURRITURE) -->
     <div class="tab-content" id="tab-archives">
       <div class="master-control">
         <span>Afficher les archives</span>
         <label class="switch"><input type="checkbox" id="toggle-all-archive"><span class="slider"></span></label>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Anciens lieux et monuments qui ne font plus forcément partie du parcours principal.</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Contient l'ancienne liste de nourriture et les monuments archivés.</p>
       <div id="archive-categories-container"></div>
     </div>
   </div>
@@ -190,9 +181,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const sanitizeId = (str) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const createCustomIcon = (color, emoji) => L.divIcon({ html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+    const createCustomIcon = (color, emoji) => L.divIcon({ 
+      html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, 
+      className: '', iconSize: [28, 28], iconAnchor: [14, 14] 
+    });
 
-    // --- DONNÉES ACTIVES ---
+    // --- LIEUX ACTIFS SUR LA CARTE ---
     const activePlaces = {
       "🏨 Mon Hébergement": { color: "#FF3B30", icon: "🏨", items: [
         { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨", hours: "Ouvert 24h/24" }
@@ -204,7 +198,7 @@
         { name: "NYC Artechouse", lat: 40.7423, lng: -74.0061, price: true, icon: "🎨", hours: "10:00 - 22:00" }
       ]},
       "Spectacles & Restos Animés": { color: "#FF2D55", icon: "🎭", items: [
-        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞", hours: "~19:00 (selon billet)" },
+        { name: "Aladdin the musical", lat: 40.7571, lng: -73.9866, price: true, icon: "🧞", hours: "~19:00" },
         { name: "Gospel Harlem Hallelujah", lat: 40.8075, lng: -73.9465, price: true, icon: "🎵", hours: "~18:30/19:00" },
         { name: "Ellen's Stardust Diner", lat: 40.7614, lng: -73.9835, price: true, icon: "🎤", hours: "07:00 - 00:00" }
       ]},
@@ -220,21 +214,50 @@
       ]}
     };
 
-    // --- POINTS DE REPAS ---
+    // --- NOUVELLES LISTES DE NOURRITURE (POINTS DE REPAS - MASQUÉS PAR DÉFAUT) ---
     const foodPlaces = {
-      "Food (Brunch, Bagels, Pizza...)": { color: "#ff9500", icon: "🍔", items: [ 
-        { name: "Clinton St. Baking (Brunch)", lat: 40.7212, lng: -73.9839, icon: "🥞" },
-        { name: "Sunday in Brooklyn (Brunch)", lat: 40.7142, lng: -73.9630, icon: "🥞" },
-        { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, 
-        { name: "Russ & Daughters", lat: 40.7225, lng: -73.9882, icon: "🥯" },
-        { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, 
-        { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, 
-        { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } 
+      "Food": { color: "#FF9500", icon: "🍕", items: [
+        { name: "Rubirosa (Tie dye pizza)", lat: 40.7227, lng: -73.9959, icon: "🍕" },
+        { name: "Thai Villa / Pranakon (Thai food)", lat: 40.7390, lng: -73.9906, icon: "🍜" },
+        { name: "ABC Kitchen", lat: 40.7375, lng: -73.9897, icon: "🍽️" },
+        { name: "Anytime Kitchen (Korean food)", lat: 40.7478, lng: -73.9866, icon: "🍲" },
+        { name: "Ippudo (Ramen)", lat: 40.7311, lng: -73.9908, icon: "🍜" },
+        { name: "Umami Sushi (Lunch)", lat: 40.7112, lng: -74.0118, icon: "🍣" },
+        { name: "The Halal Guys (Lunch)", lat: 40.7630, lng: -73.9781, icon: "🥙" },
+        { name: "Katz's Delicatessen (Jewish deli)", lat: 40.7222, lng: -73.9874, icon: "🥪", hours: "When Harry Met Sally movie" },
+        { name: "Electric Burrito (Lunch)", lat: 40.7275, lng: -73.9840, icon: "🌯" }
+      ]},
+      "Brunch": { color: "#FF2D55", icon: "🍳", items: [
+        { name: "Jack's Wife Freda", lat: 40.7223, lng: -73.9976, icon: "🍳" },
+        { name: "Beauty & Essex", lat: 40.7205, lng: -73.9870, icon: "🍸", hours: "Excellente option pour le dîner aussi" }
+      ]},
+      "Bagels": { color: "#AF52DE", icon: "🥯", items: [
+        { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" },
+        { name: "Leon's Bagels", lat: 40.7238, lng: -73.9982, icon: "🥯" }
+      ]},
+      "Bakeries": { color: "#5856D6", icon: "🥐", items: [
+        { name: "Smør (Cardamom buns)", lat: 40.7297, lng: -73.9806, icon: "🥐" },
+        { name: "Aux Merveilleux de Fred (Brioche bun)", lat: 40.7348, lng: -74.0022, icon: "🧁" },
+        { name: "Ole & Steen (Cinnamon roll)", lat: 40.7380, lng: -73.9895, icon: "🥮" },
+        { name: "Librae Bakery", lat: 40.7282, lng: -73.9912, icon: "🍞" }
+      ]},
+      "Dessert": { color: "#FF3B30", icon: "🍰", items: [
+        { name: "Spot Dessert Bar", lat: 40.7288, lng: -73.9888, icon: "🍰" },
+        { name: "Tiger Sugar Boba", lat: 40.7176, lng: -73.9985, icon: "🧋" },
+        { name: "Lazy Sundaes Boba", lat: 40.7300, lng: -74.0002, icon: "🧋" },
+        { name: "Prince Tea House", lat: 40.7208, lng: -73.9937, icon: "🫖" },
+        { name: "Levain Bakery (Chocolate chip cookies)", lat: 40.7799, lng: -73.9803, icon: "🍪" }
       ]}
     };
 
-    // --- DONNÉES ARCHIVÉES ---
+    // --- DONNÉES ARCHIVÉES (DÉCOCHÉES PAR DÉFAUT) ---
     const archivedPlaces = {
+      "Ancienne Liste Nourriture": { color: "#8e8e93", icon: "🍔", items: [
+        { name: "Clinton St. Baking (Brunch)", lat: 40.7212, lng: -73.9839, icon: "🥞" },
+        { name: "Sunday in Brooklyn (Brunch)", lat: 40.7142, lng: -73.9630, icon: "🥞" },
+        { name: "Russ & Daughters", lat: 40.7225, lng: -73.9882, icon: "🥯" },
+        { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }
+      ]},
       "Anciennes Boutiques": { color: "#8e8e93", icon: "🛍️", items: [ 
         { name: "M&M's World", lat: 40.7596, lng: -73.9845, icon: "🍬" }, 
         { name: "LEGO Store NYC", lat: 40.7590, lng: -73.9772, icon: "🧱" }, 
@@ -250,17 +273,17 @@
       ]}
     };
 
-    const map = L.map('map', { center: [40.7500, -73.9800], zoom: 12, zoomControl: false });
+    const map = L.map('map', { center: [40.7350, -73.9900], zoom: 12, zoomControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     const subwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.75 }).addTo(map);
 
     const markersMap = new Map();
 
-    // Génération HTML générique
-    function buildCategoryHTML(dataObj, containerId, isArchivedByDefault) {
+    // Génération HTML dynamique
+    function buildCategoryHTML(dataObj, containerId, isHiddenByDefault) {
       let html = '';
       Object.entries(dataObj).forEach(([catName, cat]) => {
-        const catId = sanitizeId(catName) + (isArchivedByDefault ? '_arc' : '_act');
+        const catId = sanitizeId(catName) + '_' + containerId;
         let itemsHTML = '';
 
         cat.items.forEach((item, idx) => {
@@ -268,16 +291,15 @@
           const itemIcon = item.icon || cat.icon;
           
           const marker = L.marker([item.lat, item.lng], { icon: createCustomIcon(cat.color, itemIcon) });
-          const popupHours = item.hours ? `<br>🕒 <b>Horaires:</b> ${item.hours}` : '';
-          marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>${popupHours}`);
+          const popupExtra = item.hours ? `<br><small style="color:#666;">${item.hours}</small>` : '';
+          marker.bindPopup(`<b>${itemIcon} ${item.name}</b><br><small>${catName}</small>${popupExtra}`);
           
-          if (!isArchivedByDefault) marker.addTo(map);
+          if (!isHiddenByDefault) marker.addTo(map);
           
-          // Sauvegarder l'origine du container pour faciliter la manipulation globale
-          markersMap.set(itemId, { marker, catId, isArchived: isArchivedByDefault, containerId });
+          markersMap.set(itemId, { marker, catId, isHidden: isHiddenByDefault, containerId });
 
           const badges = `${item.price ? '<span class="badge-price">$</span>' : ''}${item.free ? '<span class="badge-free">Gratuit</span>' : ''}`;
-          const hoursHtml = item.hours ? `<span class="item-hours">🕒 ${item.hours}</span>` : '';
+          const hoursHtml = item.hours ? `<span class="item-hours">${item.hours}</span>` : '';
           
           itemsHTML += `
             <div class="item-row">
@@ -285,7 +307,7 @@
                 <span>${itemIcon} ${item.name} ${badges}</span>
                 ${hoursHtml}
               </div>
-              <label class="switch"><input type="checkbox" ${!isArchivedByDefault ? 'checked' : ''} data-type="item" data-id="${itemId}" class="item-cb"><span class="slider"></span></label>
+              <label class="switch"><input type="checkbox" ${!isHiddenByDefault ? 'checked' : ''} data-type="item" data-id="${itemId}" class="item-cb"><span class="slider"></span></label>
             </div>`;
         });
 
@@ -293,7 +315,7 @@
           <div class="category-group open">
             <div class="category-header" onclick="this.parentElement.classList.toggle('open')">
               <span style="color:${cat.color}">${cat.icon} ${catName}</span>
-              <label class="switch" onclick="event.stopPropagation()"><input type="checkbox" ${!isArchivedByDefault ? 'checked' : ''} data-type="cat" data-id="${catId}" class="cat-cb"><span class="slider"></span></label>
+              <label class="switch" onclick="event.stopPropagation()"><input type="checkbox" ${!isHiddenByDefault ? 'checked' : ''} data-type="cat" data-id="${catId}" class="cat-cb"><span class="slider"></span></label>
             </div>
             <div class="category-items">${itemsHTML}</div>
           </div>`;
@@ -319,7 +341,7 @@
       });
     }
 
-    // Construction des différentes listes (Food & Archives sont à `true` donc masqués par défaut)
+    // Construction des différentes listes
     buildCategoryHTML(activePlaces, 'active-categories-container', false);
     buildCategoryHTML(foodPlaces, 'food-categories-container', true);
     buildCategoryHTML(archivedPlaces, 'archive-categories-container', true);
@@ -345,19 +367,15 @@
       markersMap.forEach(obj => { if(obj.containerId === 'archive-categories-container') isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
     });
 
-    // Filtre des jours du planning
+    // Filtre du planning
     document.getElementById('planning-day-select').addEventListener('change', (e) => {
       const selected = e.target.value;
       document.querySelectorAll('.day-card').forEach(card => {
-        if (selected === 'all' || card.dataset.day === selected) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
+        card.style.display = (selected === 'all' || card.dataset.day === selected) ? 'block' : 'none';
       });
     });
 
-    // Sidebar UI
+    // Navigation UI
     const sidebar = document.getElementById('sidebar');
     document.getElementById('burger-btn').onclick = () => sidebar.classList.add('active');
     document.getElementById('panel-close').onclick = () => sidebar.classList.remove('active');
@@ -372,7 +390,7 @@
       }
     });
 
-    // Geoloc
+    // Géolocalisation
     let userMarker = null;
     document.getElementById('geolocation-btn').onclick = () => map.locate({ setView: true, maxZoom: 16 });
     map.on('locationfound', (e) => {
