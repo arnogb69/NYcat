@@ -76,8 +76,8 @@
 
   <div id="map"></div>
 
-  <!-- Global Burger Menu Button -->
-  <button id="burger-btn" class="overlay-control">☰ Menu</button>
+  <!-- Global Burger Menu Button (Renommé Info) -->
+  <button id="burger-btn" class="overlay-control">☰ Info</button>
   <button id="geolocation-btn" title="Ma Position">🎯</button>
 
   <div id="sidebar">
@@ -89,7 +89,8 @@
     <!-- Vertical Navigation Menu -->
     <div class="nav-tabs">
       <button class="tab-btn active" data-target="tab-planning">🗓️ Mon Planning</button>
-      <button class="tab-btn" data-target="tab-filters">📍 Lieux Actifs (Carte)</button>
+      <button class="tab-btn" data-target="tab-filters">📍 Lieux Actifs</button>
+      <button class="tab-btn" data-target="tab-food">🍔 Points de repas</button>
       <button class="tab-btn" data-target="tab-archives">🗄️ Archives</button>
     </div>
 
@@ -165,13 +166,23 @@
       <div id="active-categories-container"></div>
     </div>
 
-    <!-- TAB 3: ARCHIVES -->
+    <!-- TAB 3: POINTS DE REPAS (NOUVEAU) -->
+    <div class="tab-content" id="tab-food">
+      <div class="master-control">
+        <span>Afficher les points de repas</span>
+        <label class="switch"><input type="checkbox" id="toggle-all-food"><span class="slider"></span></label>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux gourmands sont masqués par défaut pour alléger la carte. Cochez-les pour les faire apparaître au besoin.</p>
+      <div id="food-categories-container"></div>
+    </div>
+
+    <!-- TAB 4: ARCHIVES -->
     <div class="tab-content" id="tab-archives">
       <div class="master-control">
-        <span>Afficher les archives sur la carte</span>
+        <span>Afficher les archives</span>
         <label class="switch"><input type="checkbox" id="toggle-all-archive"><span class="slider"></span></label>
       </div>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Ces lieux sont masqués par défaut pour alléger la carte. Activez-les pour afficher vos anciennes idées (Brunch, Bagels, etc.).</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Anciens lieux et monuments qui ne font plus forcément partie du parcours principal.</p>
       <div id="archive-categories-container"></div>
     </div>
   </div>
@@ -181,7 +192,7 @@
     const sanitizeId = (str) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
     const createCustomIcon = (color, emoji) => L.divIcon({ html: `<div style="background-color:${color}; width:28px; height:28px; border-radius:50%; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:14px;">${emoji || ''}</div>`, className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
 
-    // --- DONNÉES ACTIVES (Avec Horaires) ---
+    // --- DONNÉES ACTIVES ---
     const activePlaces = {
       "🏨 Mon Hébergement": { color: "#FF3B30", icon: "🏨", items: [
         { name: "The Allen Hotel", lat: 40.7190, lng: -73.9902, icon: "🏨", hours: "Ouvert 24h/24" }
@@ -209,6 +220,19 @@
       ]}
     };
 
+    // --- POINTS DE REPAS ---
+    const foodPlaces = {
+      "Food (Brunch, Bagels, Pizza...)": { color: "#ff9500", icon: "🍔", items: [ 
+        { name: "Clinton St. Baking (Brunch)", lat: 40.7212, lng: -73.9839, icon: "🥞" },
+        { name: "Sunday in Brooklyn (Brunch)", lat: 40.7142, lng: -73.9630, icon: "🥞" },
+        { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, 
+        { name: "Russ & Daughters", lat: 40.7225, lng: -73.9882, icon: "🥯" },
+        { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, 
+        { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, 
+        { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } 
+      ]}
+    };
+
     // --- DONNÉES ARCHIVÉES ---
     const archivedPlaces = {
       "Anciennes Boutiques": { color: "#8e8e93", icon: "🛍️", items: [ 
@@ -223,15 +247,6 @@
         { name: "Statue de la Liberté", lat: 40.6892, lng: -74.0445, icon: "🗽" }, 
         { name: "Empire State Building", lat: 40.7484, lng: -73.9857, icon: "🏙️" }, 
         { name: "Ground Zero", lat: 40.7127, lng: -74.0134, icon: "🕊️" } 
-      ]},
-      "Food (Brunch, Bagels, Pizza...)": { color: "#8e8e93", icon: "🍔", items: [ 
-        { name: "Clinton St. Baking (Brunch)", lat: 40.7212, lng: -73.9839, icon: "🥞" },
-        { name: "Sunday in Brooklyn (Brunch)", lat: 40.7142, lng: -73.9630, icon: "🥞" },
-        { name: "Apollo Bagel", lat: 40.7288, lng: -73.9822, icon: "🥯" }, 
-        { name: "Russ & Daughters", lat: 40.7225, lng: -73.9882, icon: "🥯" },
-        { name: "Joe's Pizza", lat: 40.7306, lng: -74.0021, icon: "🍕" }, 
-        { name: "Katz's Delicatessen", lat: 40.7222, lng: -73.9874, icon: "🥪" }, 
-        { name: "Levain Bakery", lat: 40.7799, lng: -73.9803, icon: "🍪" } 
       ]}
     };
 
@@ -258,7 +273,8 @@
           
           if (!isArchivedByDefault) marker.addTo(map);
           
-          markersMap.set(itemId, { marker, catId, isArchived: isArchivedByDefault });
+          // Sauvegarder l'origine du container pour faciliter la manipulation globale
+          markersMap.set(itemId, { marker, catId, isArchived: isArchivedByDefault, containerId });
 
           const badges = `${item.price ? '<span class="badge-price">$</span>' : ''}${item.free ? '<span class="badge-free">Gratuit</span>' : ''}`;
           const hoursHtml = item.hours ? `<span class="item-hours">🕒 ${item.hours}</span>` : '';
@@ -303,7 +319,9 @@
       });
     }
 
+    // Construction des différentes listes (Food & Archives sont à `true` donc masqués par défaut)
     buildCategoryHTML(activePlaces, 'active-categories-container', false);
+    buildCategoryHTML(foodPlaces, 'food-categories-container', true);
     buildCategoryHTML(archivedPlaces, 'archive-categories-container', true);
 
     // Contrôles globaux
@@ -312,13 +330,19 @@
     document.getElementById('toggle-all-active').addEventListener('change', (e) => {
       const isChecked = e.target.checked;
       document.querySelectorAll('#active-categories-container input[type="checkbox"]').forEach(cb => cb.checked = isChecked);
-      markersMap.forEach(obj => { if(!obj.isArchived) isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
+      markersMap.forEach(obj => { if(obj.containerId === 'active-categories-container') isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
+    });
+    
+    document.getElementById('toggle-all-food').addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      document.querySelectorAll('#food-categories-container input[type="checkbox"]').forEach(cb => cb.checked = isChecked);
+      markersMap.forEach(obj => { if(obj.containerId === 'food-categories-container') isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
     });
 
     document.getElementById('toggle-all-archive').addEventListener('change', (e) => {
       const isChecked = e.target.checked;
       document.querySelectorAll('#archive-categories-container input[type="checkbox"]').forEach(cb => cb.checked = isChecked);
-      markersMap.forEach(obj => { if(obj.isArchived) isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
+      markersMap.forEach(obj => { if(obj.containerId === 'archive-categories-container') isChecked ? map.addLayer(obj.marker) : map.removeLayer(obj.marker); });
     });
 
     // Filtre des jours du planning
